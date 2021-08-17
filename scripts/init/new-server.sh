@@ -21,7 +21,7 @@ get_picocms() {
 #	if [[ -v DATA_REPOSITORY ]]; then git clone $DATA_REPOSITORY ./data; else echo "Skipping data. No repository set"; fi
 #}
 
-get_picocms
+#get_picocms
 #get_data_repo
 
 

@@ -45,7 +45,7 @@ services:
       - ../../apps/standardnotes/html:/usr/share/nginx/standardnotes/html
 
 #  (working)
-#  twio:
+#  pico-cms:
 #    image: nginx
 #    container_name: ${DOMAIN}
 #    volumes:
@@ -57,7 +57,7 @@ services:
 #      - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN}
 #      - LETSENCRYPT_HOST=${DOMAIN},www.${DOMAIN}
   
-#  twio-notes:
+#  standard-notes:
 #    image: nginx
 #    container_name: notes.${DOMAIN}
 #    volumes:
@@ -70,7 +70,7 @@ services:
 #      - LETSENCRYPT_HOST=notes.${DOMAIN}
 
 #  (working)
-#  twio-dash:
+#  homer-dashboard:
 #    image: b4bz/homer
 #    container_name: apps.${DOMAIN}
 #    volumes:
@@ -84,7 +84,7 @@ services:
 #      - LETSENCRYPT_HOST=apps.${DOMAIN}
 
 #  (working)
-#  twio-kanboard:
+#  kanboard:
 #    image: kanboard/kanboard:latest
 #    container_name: kanboard
 #    depends_on:
@@ -117,19 +117,42 @@ services:
 #    networks:
 #      - "net"    
 
-  twio-nextcloud:
-    image: nextcloud
+#    environment:
+#      - VIRTUAL_HOST=tasks.${DOMAIN}
+#      - LETSENCRYPT_HOST=tasks.${DOMAIN}    nextcloud-app:
+
+  nextcloud-app:
+    image: nextcloud-fpm
     container_name: cloud.${DOMAIN}
     ports:
-      - 8081:8080
+      - 8087:80
     networks:
       - "net"
+    env_file:
+      - ./db.env
     environment:
       - VIRTUAL_HOST=cloud.${DOMAIN}
       - LETSENCRYPT_HOST=cloud.${DOMAIN}
+      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DB}
+      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER}
+      - MYSQL_HOST=db
+    links:
+      - db
  
-  mariadb:
-
+  db:
+    image: mariadb
+    env_file:
+      - ./db.env
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD}
+      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DB}
+      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER}
 
 volumes:
   conf:
@@ -138,6 +161,7 @@ volumes:
   dhparam:
   certs:
   acme:
+  db:
 
 networks:
   net:
