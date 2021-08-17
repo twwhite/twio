@@ -14,15 +14,15 @@
 
 ## Included Applications
 
-|Application|Source  |Destination |Description|Implementation|
+|Application|Source  |Destination |Description| What's Working |
 --- | --- | ---|---| --- |
-|PicoCMS|https://github.com/picocms/Pico|domain.example|Flat file CMS| Working |
+|PicoCMS|https://github.com/picocms/Pico|domain.example|Flat file CMS| This |
 |StandardNotes sync-server|https://github.com/standardnotes/syncing-server-js|notes-sync.domain.example|Encrypted notes syncing server| WIP |
 |StandardNotes web app|https://github.com/standardnotes/web |notes.domain.example|Encrypted notes app| WIP|
 |Nextcloud|https://github.com/nextcloud/server|cloud.domain.example|Data servver & cloud app suite| WIP|
-|Kanboard|https://github.com/kanboard/kanboard|todo.domain.example|Kanban project management tool|WIP|
-|DokuWiki|https://www.dokuwiki.org/dokuwiki|wiki.domain.example|Self-hosted databaseless Wiki|WIP|
-
+|Kanboard|https://github.com/kanboard/kanboard|todo.domain.example|Kanban project management tool|This|
+|DokuWiki|https://www.dokuwiki.org/dokuwiki|wiki.domain.example|Self-hosted databaseless Wiki|This|
+|Homer Dashboard|https://github.com/bastienwirtz/homer|apps.domain.example|Dashboard for all apps|This|
 
 ## Configuration
 The included .env file contains the following variables:
