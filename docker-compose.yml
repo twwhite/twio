@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - dhparam:/etc/nginx/dhparam
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - "net"
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - "nginx-proxy"
+    networks:
+      - "net"
+    environment:
+      - DEFAULT_EMAIL=${DEFAULT_SSL_EMAIL}
+
+  php:
+    image: php:7.2-fpm
+    container_name: php
+    ports:
+      - "9000:9000"
+    networks:
+      - "net"
+    volumes:
+      - ./apps/picocms/html:/usr/share/nginx/picocms/html
+      - ./apps/standardnotes/html:/usr/share/nginx/standardnotes/html
+
+  twio:
+    image: nginx
+    container_name: ${DOMAIN}
+    volumes:
+      - ./apps/picocms/html:/usr/share/nginx/picocms/html
+      - ./apps/picocms/conf.d:/etc/nginx/conf.d
+    networks:
+      - "net"
+    environment:
+      - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN}
+      - LETSENCRYPT_HOST=${DOMAIN},www.${DOMAIN}
+  
+#  twio-notes:
+#    image: nginx
+#    container_name: notes.${DOMAIN}
+#    volumes:
+#      - ./notes.${DOMAIN}/html:/usr/share/nginx/notes.${DOMAIN}/html
+#      - ./notes.${DOMAIN}/conf.d:/etc/nginx/conf.d
+#    networks:
+#      - "net"
+#    environment:
+#      - VIRTUAL_HOST=notes.${DOMAIN}
+#      - LETSENCRYPT_HOST=notes.${DOMAIN}
+
+  twio-dash:
+    image: b4bz/homer
+    container_name: apps.${DOMAIN}
+    volumes:
+      - /twio/apps/homer-dashboard/public/assets:/www/assets
+    ports:
+      - 8080:8080
+    networks:
+      - "net"
+    environment:
+      - VIRTUAL_HOST=apps.${DOMAIN}
+      - LETSENCRYPT_HOST=apps.${DOMAIN}
+
+#  twio-kanboard:
+#    image: kanboard/kanboard:latest
+#    container_name: kanboard
+#    depends_on:
+#      - "acme-companion"
+#    environment:
+#      - VIRTUAL_HOST=tasks.${DOMAIN}
+#      - LETSENCRYPT_HOST=tasks.${DOMAIN}  
+#    networks:
+#      - "net"
+#    ports:
+#      - "8083:80"
+#      - "8084:443"
+#    volumes:
+#      - ${LOCAL_DATA_FOLDER}/apps/kanboard/data:/var/www/app/data
+#      - ${LOCAL_DATA_FOLDER}/apps/kanboard/plugins:/var/www/app/plugins
+
+
+
+  dokuwiki:
+    image: linuxserver/dokuwiki:version-2020-07-29
+    container_name: dokuwiki
+    restart: unless-stopped
+    volumes:
+      - ${LOCAL_DATA_FOLDER}/apps/dokuwiki/config:/config
+    ports:
+      - 8085:443/tcp
+      - 8086:80/tcp
+    environment:
+      - VIRTUAL_HOST=wiki.${DOMAIN}
+      - LETSENCRYPT_HOST=wiki.${DOMAIN}  
+    networks:
+      - "net"    
+
+#  twio-nextcloud:
+#    image: nextcloud
+#    container_name: cloud.${DOMAIN}
+#    ports:
+#      - 8081:8080
+#    networks:
+#      - "net"
+#    environment:
+#      - VIRTUAL_HOST=cloud.${DOMAIN}
+#      - LETSENCRYPT_HOST=cloud.${DOMAIN}
+    
+
+volumes:
+  conf:
+  vhost:
+  html:
+  dhparam:
+  certs:
+  acme:
+
+networks:
+  net:
+    external: true
