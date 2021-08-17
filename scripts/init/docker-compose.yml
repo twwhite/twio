@@ -128,8 +128,6 @@ services:
       - 8087:80
     networks:
       - "net"
-    env_file:
-      - ./db.env
     environment:
       - VIRTUAL_HOST=cloud.${DOMAIN}
       - LETSENCRYPT_HOST=cloud.${DOMAIN}
@@ -142,8 +140,6 @@ services:
  
   db:
     image: mariadb
-    env_file:
-      - ./db.env
     restart: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
