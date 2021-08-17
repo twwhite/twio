@@ -41,15 +41,15 @@ services:
     networks:
       - "net"
     volumes:
-      - ./apps/picocms/html:/usr/share/nginx/picocms/html
-      - ./apps/standardnotes/html:/usr/share/nginx/standardnotes/html
+      - ../../apps/picocms/html:/usr/share/nginx/picocms/html
+      - ../../apps/standardnotes/html:/usr/share/nginx/standardnotes/html
 
   twio:
     image: nginx
     container_name: ${DOMAIN}
     volumes:
-      - ./apps/picocms/html:/usr/share/nginx/picocms/html
-      - ./apps/picocms/conf.d:/etc/nginx/conf.d
+      - ../../apps/picocms/html:/usr/share/nginx/picocms/html
+      - ../../apps/picocms/conf.d:/etc/nginx/conf.d
     networks:
       - "net"
     environment:
@@ -72,7 +72,7 @@ services:
     image: b4bz/homer
     container_name: apps.${DOMAIN}
     volumes:
-      - /twio/apps/homer-dashboard/public/assets:/www/assets
+      - ../../apps/homer-dashboard/public/assets:/www/assets
     ports:
       - 8080:8080
     networks:
@@ -81,31 +81,29 @@ services:
       - VIRTUAL_HOST=apps.${DOMAIN}
       - LETSENCRYPT_HOST=apps.${DOMAIN}
 
-#  twio-kanboard:
-#    image: kanboard/kanboard:latest
-#    container_name: kanboard
-#    depends_on:
-#      - "acme-companion"
-#    environment:
-#      - VIRTUAL_HOST=tasks.${DOMAIN}
-#      - LETSENCRYPT_HOST=tasks.${DOMAIN}  
-#    networks:
-#      - "net"
-#    ports:
-#      - "8083:80"
-#      - "8084:443"
-#    volumes:
-#      - ${LOCAL_DATA_FOLDER}/apps/kanboard/data:/var/www/app/data
-#      - ${LOCAL_DATA_FOLDER}/apps/kanboard/plugins:/var/www/app/plugins
-
-
+  twio-kanboard:
+    image: kanboard/kanboard:latest
+    container_name: kanboard
+    depends_on:
+      - "acme-companion"
+    environment:
+      - VIRTUAL_HOST=tasks.${DOMAIN}
+      - LETSENCRYPT_HOST=tasks.${DOMAIN}  
+    networks:
+      - "net"
+    ports:
+      - "8083:80"
+      - "8084:443"
+    volumes:
+      - ../../apps/kanboard/data:/var/www/app/data
+      - ../../apps/kanboard/plugins:/var/www/app/plugins
 
   dokuwiki:
     image: linuxserver/dokuwiki:version-2020-07-29
     container_name: dokuwiki
     restart: unless-stopped
     volumes:
-      - ${LOCAL_DATA_FOLDER}/apps/dokuwiki/config:/config
+      - ../../apps/dokuwiki/config:/config
     ports:
       - 8085:443/tcp
       - 8086:80/tcp
