@@ -30,6 +30,11 @@ The included .env file contains the following variables:
 * DOMAIN=  | Default domain name associated with all services
 * DEFAULT_SSL_EMAIL=  | Email account used for ACME SSL creation/renewal
 
+An additional db.env file should be created including:
+
+* NEXTCLOUD_MARIADB_PASSWORD=changeme123
+* NEXTCLOUD_MARIADB_DB=nextcloud
+* NEXTCLOUD_MARIADB_USER=nextcloud_user
 
 ## How To Use
 
