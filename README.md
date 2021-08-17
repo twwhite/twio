@@ -8,7 +8,7 @@
 <p align="center">
   <a href="#included-applications">Included Applications</a> •
   <a href="#configuration">Configuration</a> •
-  <a href="#download">Download</a>
+  <a href="#download">Download</a> •
 </p>
 
 
