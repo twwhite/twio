@@ -25,6 +25,8 @@
 |Homer Dashboard|https://github.com/bastienwirtz/homer|apps.domain.example|Dashboard for all apps|This|
 
 ## Configuration
+WIP -
+
 The included .env file contains the following variables:
 
 * DOMAIN=  | Default domain name associated with all services
