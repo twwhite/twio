@@ -17,8 +17,9 @@ get_picocms() {
 	php composer.phar --working-dir=../../apps/picocms/html/ install
 }
 
-
-get_picocms
+if [ -d "php" ]; then
+	get_picocms
+fi
 
 
 docker network create --driver bridge net || true
