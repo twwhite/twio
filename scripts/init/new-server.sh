@@ -16,15 +16,22 @@ get_picocms() {
 	php composer.phar --working-dir=../../apps/picocms/html/ install
 }
 
+get_wiki_files() {
+	echo "get_wiki_files()"
+}
+
 #get_data_repo() {
 #	# Get existing data if data repository set
 #	if [[ -v DATA_REPOSITORY ]]; then git clone $DATA_REPOSITORY ./data; else echo "Skipping data. No repository set"; fi
 #}
 
-#get_picocms
+get_picocms
 #get_data_repo
 
 
 
 docker network create --driver bridge net || true
+docker network create --driver bridge cloud-internal || true
+docker network create --driver bridge php-internal || true
+
 docker-compose up -d

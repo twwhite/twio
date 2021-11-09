@@ -1,4 +1,5 @@
 FROM php:7.4-fpm
+#RUN sed -i 's/9000/9001/' /usr/local/etc/php-fpm.d/zz-docker.conf
 RUN apt-get update && apt-get install -y \
 	libzip-dev \
 	zip \
