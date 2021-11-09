@@ -56,6 +56,8 @@ services:
     networks:
       - php-internal
       - net
+    depends_on:
+      - php
     environment:
       - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN}
       - LETSENCRYPT_HOST=${DOMAIN},www.${DOMAIN}
@@ -73,36 +75,36 @@ services:
 #      - LETSENCRYPT_HOST=notes.${DOMAIN}
 
 #  (working)
-#  homer-dashboard:
-#    image: b4bz/homer
-#    container_name: apps.${DOMAIN}
-#    volumes:
-#      - ../../apps/homer-dashboard/public/assets:/www/assets
-#    ports:
-#      - 8080:8080
-#    networks:
-#      - "net"
-#    environment:
-#      - VIRTUAL_HOST=apps.${DOMAIN}
-#      - LETSENCRYPT_HOST=apps.${DOMAIN}
+  homer-dashboard:
+    image: b4bz/homer
+    container_name: apps.${DOMAIN}
+    volumes:
+      - ${HOMER_DATA_DIR:-../../apps/homer-dashboard/public/assets}:/www/assets
+    ports:
+      - 8080:8080
+    networks:
+      - "net"
+    environment:
+      - VIRTUAL_HOST=apps.${DOMAIN}
+      - LETSENCRYPT_HOST=apps.${DOMAIN}
 
 #  (working)
-#  kanboard:
-#    image: kanboard/kanboard:latest
-#    container_name: kanboard
-#    depends_on:
-#      - "acme-companion"
-#    environment:
-#      - VIRTUAL_HOST=tasks.${DOMAIN}
-#      - LETSENCRYPT_HOST=tasks.${DOMAIN}  
-#    networks:
-#      - "net"
-#    ports:
-#      - "8083:80"
-#      - "8084:443"
-#    volumes:
-#      - ../../apps/kanboard/data:/var/www/app/data
-#      - ../../apps/kanboard/plugins:/var/www/app/plugins
+  kanboard:
+    image: kanboard/kanboard:latest
+    container_name: kanboard
+    depends_on:
+      - "acme-companion"
+    environment:
+      - VIRTUAL_HOST=tasks.${DOMAIN}
+      - LETSENCRYPT_HOST=tasks.${DOMAIN}  
+    networks:
+      - "net"
+    ports:
+      - "8083:80"
+      - "8084:443"
+    volumes:
+      - ../../apps/kanboard/data:/var/www/app/data
+      - ../../apps/kanboard/plugins:/var/www/app/plugins
 
 #  (working)
   dokuwiki:
