@@ -17,7 +17,8 @@ get_picocms() {
 	php composer.phar --working-dir=../../apps/picocms/html/ install
 }
 
-if [ -d "php" ]; then
+if [ ! -d "php" ]; then
+	echo "Getting Pico CMS"
 	get_picocms
 fi
 

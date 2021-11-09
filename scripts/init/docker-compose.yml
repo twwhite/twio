@@ -43,7 +43,7 @@ services:
     networks:
       - php-internal
     volumes:
-      - ../../apps/picocms/html:/usr/share/nginx/picocms/html
+      - ${PICO_DATA_DIR:-../../apps/picocms/html}:/usr/share/nginx/picocms/html
       - ../../apps/standardnotes/html:/usr/share/nginx/standardnotes/html
 
 
@@ -51,7 +51,7 @@ services:
     image: nginx
     container_name: ${DOMAIN}
     volumes:
-      - ../../apps/picocms/html:/usr/share/nginx/picocms/html
+      - ${PICO_DATA_DIR:-../../apps/picocms/html}:/usr/share/nginx/picocms/html
       - ../../apps/picocms/conf.d:/etc/nginx/conf.d
     networks:
       - php-internal
