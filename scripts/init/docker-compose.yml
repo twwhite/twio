@@ -111,6 +111,8 @@ services:
     restart: unless-stopped
     volumes:
       - ../../apps/dokuwiki/config:/config
+      - ${DOKUWIKI_CONF_DIR:-../../apps/dokuwiki/config/dokuwiki/conf}:/config/dokuwiki/conf
+      - ${DOKUWIKI_DATA_DIR:-../../apps/dokuwiki/config/dokuwiki/data}:/config/dokuwiki/data
     ports:
       - 8085:443/tcp
       - 8086:80/tcp
