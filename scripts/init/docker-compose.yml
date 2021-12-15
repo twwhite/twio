@@ -43,16 +43,17 @@ services:
     networks:
       - php-internal
     volumes:
-      - ${PICO_DATA_DIR:-../../apps/picocms/html}:/usr/share/nginx/picocms/html
+      - ../../apps/picocms/html:/usr/share/nginx/picocms/html
       - ../../apps/standardnotes/html:/usr/share/nginx/standardnotes/html
-
+      - ${PICO_DATA_DIR:-../../apps/picocms/html}:/usr/share/nginx/picocms/html
 
   pico-cms:
     image: nginx
     container_name: ${DOMAIN}
     volumes:
-      - ${PICO_DATA_DIR:-../../apps/picocms/html}:/usr/share/nginx/picocms/html
+      - ../../apps/picocms/:/usr/share/nginx/picocms/
       - ../../apps/picocms/conf.d:/etc/nginx/conf.d
+      - ${PICO_DATA_DIR:-../../apps/picocms/html}:/usr/share/nginx/picocms/html
     networks:
       - php-internal
       - net
@@ -75,54 +76,54 @@ services:
 #      - LETSENCRYPT_HOST=notes.${DOMAIN}
 
 #  (working)
-  homer-dashboard:
-    image: b4bz/homer
-    container_name: apps.${DOMAIN}
-    volumes:
-      - ${HOMER_DATA_DIR:-../../apps/homer-dashboard/public/assets}:/www/assets
-    ports:
-      - 8080:8080
-    networks:
-      - "net"
-    environment:
-      - VIRTUAL_HOST=apps.${DOMAIN}
-      - LETSENCRYPT_HOST=apps.${DOMAIN}
+#  homer-dashboard:
+#    image: b4bz/homer
+#    container_name: apps.${DOMAIN}
+#    volumes:
+#      - ${HOMER_DATA_DIR:-../../apps/homer-dashboard/public/assets}:/www/assets
+#    ports:
+#      - 8080:8080
+#    networks:
+#      - "net"
+#    environment:
+#      - VIRTUAL_HOST=apps.${DOMAIN}
+#      - LETSENCRYPT_HOST=apps.${DOMAIN}
 
 #  (working)
-  kanboard:
-    image: kanboard/kanboard:latest
-    container_name: kanboard
-    depends_on:
-      - "acme-companion"
-    environment:
-      - VIRTUAL_HOST=tasks.${DOMAIN}
-      - LETSENCRYPT_HOST=tasks.${DOMAIN}  
-    networks:
-      - "net"
-    ports:
-      - "8083:80"
-      - "8084:443"
-    volumes:
-      - ../../apps/kanboard/data:/var/www/app/data
-      - ../../apps/kanboard/plugins:/var/www/app/plugins
+#  kanboard:
+#    image: kanboard/kanboard:latest
+#    container_name: kanboard
+#    depends_on:
+#      - "acme-companion"
+#    environment:
+#      - VIRTUAL_HOST=tasks.${DOMAIN}
+#      - LETSENCRYPT_HOST=tasks.${DOMAIN}  
+#    networks:
+#      - "net"
+#    ports:
+#      - "8083:80"
+#      - "8084:443"
+#    volumes:
+#      - ../../apps/kanboard/data:/var/www/app/data
+#      - ../../apps/kanboard/plugins:/var/www/app/plugins
 
 #  (working)
-  dokuwiki:
-    image: linuxserver/dokuwiki:version-2020-07-29
-    container_name: dokuwiki
-    restart: unless-stopped
-    volumes:
-      - ../../apps/dokuwiki/config:/config
-      - ${DOKUWIKI_CONF_DIR:-../../apps/dokuwiki/config/dokuwiki/conf}:/config/dokuwiki/conf
-      - ${DOKUWIKI_DATA_DIR:-../../apps/dokuwiki/config/dokuwiki/data}:/config/dokuwiki/data
-    ports:
-      - 8085:443/tcp
-      - 8086:80/tcp
-    environment:
-      - VIRTUAL_HOST=wiki.${DOMAIN}
-      - LETSENCRYPT_HOST=wiki.${DOMAIN}  
-    networks:
-      - "net"    
+#  dokuwiki:
+#    image: linuxserver/dokuwiki:version-2020-07-29
+#    container_name: dokuwiki
+#    restart: unless-stopped
+#    volumes:
+#      - ../../apps/dokuwiki/config:/config
+#      - ${DOKUWIKI_CONF_DIR:-../../apps/dokuwiki/config/dokuwiki/conf}:/config/dokuwiki/conf
+#      - ${DOKUWIKI_DATA_DIR:-../../apps/dokuwiki/config/dokuwiki/data}:/config/dokuwiki/data
+#    ports:
+#      - 8085:443/tcp
+#      - 8086:80/tcp
+#    environment:
+#      - VIRTUAL_HOST=wiki.${DOMAIN}
+#      - LETSENCRYPT_HOST=wiki.${DOMAIN}  
+#    networks:
+#      - "net"    
 
 #    environment:
 #      - VIRTUAL_HOST=tasks.${DOMAIN}

@@ -17,11 +17,7 @@ get_picocms() {
 	php composer.phar --working-dir=../../apps/picocms/html/ install
 }
 
-if [ ! -d "php" ]; then
-	echo "Getting Pico CMS"
-	get_picocms
-fi
-
+get_picocms
 
 docker network create --driver bridge net || true
 docker network create --driver bridge cloud-internal || true
