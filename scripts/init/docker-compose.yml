@@ -43,17 +43,25 @@ services:
     networks:
       - php-internal
     volumes:
-      - ../../apps/picocms/html:/usr/share/nginx/picocms/html
-      - ../../apps/standardnotes/html:/usr/share/nginx/standardnotes/html
-      - ${PICO_DATA_DIR:-../../apps/picocms/html}:/usr/share/nginx/picocms/html
+      - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
+      - ${ROOT_DIR}/apps/standardnotes/html:/usr/share/nginx/standardnotes/html
+#      - ${PICO_DATA_DIR}/*:/usr/share/nginx/picocms/html/*
+      - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
+      - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
+      - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
+      - ${PICO_DATA_DIR}/config:/usr/share/nginx/picocms/html/config
 
   pico-cms:
     image: nginx
     container_name: ${DOMAIN}
     volumes:
-      - ../../apps/picocms/:/usr/share/nginx/picocms/
-      - ../../apps/picocms/conf.d:/etc/nginx/conf.d
-      - ${PICO_DATA_DIR:-../../apps/picocms/html}:/usr/share/nginx/picocms/html
+      - ${ROOT_DIR}/apps/picocms/conf.d:/etc/nginx/conf.d
+      - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
+      - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
+      - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
+      - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
+      - ${PICO_DATA_DIR}/config:/usr/share/nginx/picocms/html/config
+
     networks:
       - php-internal
       - net
@@ -80,7 +88,7 @@ services:
 #    image: b4bz/homer
 #    container_name: apps.${DOMAIN}
 #    volumes:
-#      - ${HOMER_DATA_DIR:-../../apps/homer-dashboard/public/assets}:/www/assets
+#      - ${HOMER_DATA_DIR:-${ROOT_DIR}/apps/homer-dashboard/public/assets}:/www/assets
 #    ports:
 #      - 8080:8080
 #    networks:
@@ -104,8 +112,8 @@ services:
 #      - "8083:80"
 #      - "8084:443"
 #    volumes:
-#      - ../../apps/kanboard/data:/var/www/app/data
-#      - ../../apps/kanboard/plugins:/var/www/app/plugins
+#      - ${ROOT_DIR}/apps/kanboard/data:/var/www/app/data
+#      - ${ROOT_DIR}/apps/kanboard/plugins:/var/www/app/plugins
 
 #  (working)
 #  dokuwiki:
@@ -113,9 +121,9 @@ services:
 #    container_name: dokuwiki
 #    restart: unless-stopped
 #    volumes:
-#      - ../../apps/dokuwiki/config:/config
-#      - ${DOKUWIKI_CONF_DIR:-../../apps/dokuwiki/config/dokuwiki/conf}:/config/dokuwiki/conf
-#      - ${DOKUWIKI_DATA_DIR:-../../apps/dokuwiki/config/dokuwiki/data}:/config/dokuwiki/data
+#      - ${ROOT_DIR}/apps/dokuwiki/config:/config
+#      - ${DOKUWIKI_CONF_DIR:-${ROOT_DIR}/apps/dokuwiki/config/dokuwiki/conf}:/config/dokuwiki/conf
+#      - ${DOKUWIKI_DATA_DIR:-${ROOT_DIR}/apps/dokuwiki/config/dokuwiki/data}:/config/dokuwiki/data
 #    ports:
 #      - 8085:443/tcp
 #      - 8086:80/tcp
@@ -162,7 +170,7 @@ services:
       - LETSENCRYPT_HOST=cloud.${DOMAIN}
     volumes:
       - nc:/var/www/html:ro
-      - ../../apps/nextcloud/conf.d/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${ROOT_DIR}/apps/nextcloud/conf.d/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - nextcloud-app
 
@@ -176,6 +184,7 @@ volumes:
   acme:
   db:
   nc:
+
 
 networks:
   net:  

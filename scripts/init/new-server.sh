@@ -17,7 +17,13 @@ get_picocms() {
 	php composer.phar --working-dir=../../apps/picocms/html/ install
 }
 
+
+link_data_to_apps() {
+	ln -s /
+}
+
 get_picocms
+#link_data_to_apps
 
 docker network create --driver bridge net || true
 docker network create --driver bridge cloud-internal || true
