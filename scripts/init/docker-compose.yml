@@ -137,25 +137,25 @@ services:
 #      - VIRTUAL_HOST=tasks.${DOMAIN}
 #      - LETSENCRYPT_HOST=tasks.${DOMAIN}    nextcloud-app:
 
-  db:
-    image: mariadb
-    container_name: db
-    restart: always
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --skip-innodb-read-only-compressed 
-    secrets:
-      - root_db_password
-      - nextcloud_db_password
-    environment: 
-      - MYSQL_ROOT_PASSWORD=/run/secrets/root_db_password
-      - MYSQL_DATABASE:nextcloud
-      - MYSQL_USER:nextclouduser
-      - MYSQL_PASSWORD=/run/secrets/nextcloud_db_password
-    volumes:
-      - ./db-init:/docker-entrypoint-initdb.d
-      - ${ROOT_DIR}/db:/var/lib/mysql
-    networks:
-      - cloud-internal
-      - net
+#  db:
+#    image: mariadb
+#    container_name: db
+#    restart: always
+#    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --skip-innodb-read-only-compressed 
+#    secrets:
+#      - root_db_password
+#      - nextcloud_db_password
+#    environment: 
+#      - MYSQL_ROOT_PASSWORD=/run/secrets/root_db_password
+#      - MYSQL_DATABASE:nextcloud
+#      - MYSQL_USER:nextclouduser
+#      - MYSQL_PASSWORD=/run/secrets/nextcloud_db_password
+#    volumes:
+#      - ./db-init:/docker-entrypoint-initdb.d
+#      - ${ROOT_DIR}/db:/var/lib/mysql
+#    networks:
+#      - cloud-internal
+#      - net
 
  # nextcloud-app:
  #   image: nextcloud:fpm
@@ -190,18 +190,18 @@ services:
 #    depends_on:
 #      - nextcloud-app
 
-  adminer:
-    image: adminer
-    container_name: adminer
-    restart: always
-    ports:
-      - 8088:8080
-    networks:
-      - net
-      - cloud-internal
-    environment:
-      - VIRTUAL_HOST=db.${DOMAIN}
-      - LETSENCRYPT_HOST=db.${DOMAIN}
+#  adminer:
+#    image: adminer
+#    container_name: adminer
+#    restart: always
+#    ports:
+#      - 8088:8080
+#    networks:
+#      - net
+#      - cloud-internal
+#    environment:
+#      - VIRTUAL_HOST=db.${DOMAIN}
+#      - LETSENCRYPT_HOST=db.${DOMAIN}
 
 volumes:
   conf:
