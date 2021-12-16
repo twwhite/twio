@@ -141,12 +141,15 @@ services:
     image: mariadb
     container_name: db
     restart: always
-#    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --skip-innodb-read-only-compressed 
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --skip-innodb-read-only-compressed 
+    secrets:
+      - root_db_password
+      - nextcloud_db_password
     environment: 
-      MARIADB_ROOT_PASSWORD: "example123"
-      MYSQL_DATABASE: "nextcloud"
-      MYSQL_USER: "nextcloud-user"
-      MYSQL_PASSWORD: "temp123"
+      - MYSQL_ROOT_PASSWORD=/run/secrets/root_db_password
+      - MYSQL_DATABASE:nextcloud
+      - MYSQL_USER:nextclouduser
+      - MYSQL_PASSWORD=/run/secrets/nextcloud_db_password
     volumes:
       - ./db-init:/docker-entrypoint-initdb.d
       - ${ROOT_DIR}/db:/var/lib/mysql
@@ -218,3 +221,9 @@ networks:
     driver: bridge
   php-internal:
     driver: bridge
+
+secrets:
+  root_db_password:
+    file: ./secrets/root_db_password.txt
+  nextcloud_db_password:
+    file: ./secrets/nextcloud_db_password.txt
