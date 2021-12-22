@@ -17,16 +17,17 @@ get_picocms() {
 	php composer.phar --working-dir=../../apps/picocms/html/ install
 }
 
-
-link_data_to_apps() {
-	ln -s /
-}
-
 get_picocms
-#link_data_to_apps
 
+# Setup Docker networks
 docker network create --driver bridge net || true
 docker network create --driver bridge cloud-internal || true
 docker network create --driver bridge php-internal || true
 
-docker-compose up -d
+# Setup Systemd service for persistent reboots
+sudo cp ./systemd/twio.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable twio.service
+
+# Start up TWIO services
+sudo systemctl start twio.service
