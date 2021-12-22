@@ -6,7 +6,8 @@ if [ -f $FILE ]; then
   echo ".env file exists; exporting vars"
   export $(cat .env | xargs)
 else
-  echo "Nope .env file"
+  echo "Please setup a .env file according to the README.md"
+  exit 1
 fi
 
 get_picocms() {
