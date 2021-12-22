@@ -1,0 +1,10 @@
+[Unit]
+Description=TWIO Startup.sh Reboot Script
+
+[Service]
+ExecStart=/twio/scripts/init/startup.sh
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

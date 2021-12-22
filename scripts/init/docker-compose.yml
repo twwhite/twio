@@ -147,8 +147,8 @@ services:
 #      - nextcloud_db_password
 #    environment: 
 #      - MYSQL_ROOT_PASSWORD=/run/secrets/root_db_password
-#      - MYSQL_DATABASE:nextcloud
-#      - MYSQL_USER:nextclouduser
+#      - MYSQL_DATABASE=nextcloud
+#      - MYSQL_USER=nextclouduser
 #      - MYSQL_PASSWORD=/run/secrets/nextcloud_db_password
 #    volumes:
 #      - ./db-init:/docker-entrypoint-initdb.d
@@ -223,7 +223,11 @@ networks:
     driver: bridge
 
 secrets:
+#  root_db_password:
+#    external: true
+#  nextcloud_db_password:
+#    external: true
   root_db_password:
-    file: ./secrets/root_db_password.txt
+    file: root_db_password.txt
   nextcloud_db_password:
     file: ./secrets/nextcloud_db_password.txt
