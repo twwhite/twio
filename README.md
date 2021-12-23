@@ -6,7 +6,7 @@
 
 
 <p align="center">
-  <a href="#included-applications">Included Applications</a> •
+  <a href="#included-applications">Default Applications</a> •
   <a href="#configuration">Configuration</a> •
   <a href="#download">Download</a>
 </p>
@@ -16,16 +16,31 @@
 
 |Application|Source  |Destination |Description| What's Working |
 --- | --- | ---|---| --- |
-|PicoCMS|https://github.com/picocms/Pico|domain.example|Flat file CMS| This |
+|PicoCMS|https://github.com/picocms/Pico|domain.example|Flat file CMS| :heavy_check_mark: |
 |StandardNotes sync-server|https://github.com/standardnotes/syncing-server-js|notes-sync.domain.example|Encrypted notes syncing server| WIP |
 |StandardNotes web app|https://github.com/standardnotes/web |notes.domain.example|Encrypted notes app| WIP|
 |Nextcloud|https://github.com/nextcloud/server|cloud.domain.example|Data servver & cloud app suite| WIP|
-|Kanboard|https://github.com/kanboard/kanboard|todo.domain.example|Kanban project management tool|This|
-|DokuWiki|https://www.dokuwiki.org/dokuwiki|wiki.domain.example|Self-hosted databaseless Wiki|This|
-|Homer Dashboard|https://github.com/bastienwirtz/homer|apps.domain.example|Dashboard for all apps|This|
+|Kanboard|https://github.com/kanboard/kanboard|todo.domain.example|Kanban project management tool|:heavy_check_mark:|
+|DokuWiki|https://www.dokuwiki.org/dokuwiki|wiki.domain.example|Self-hosted databaseless Wiki|:heavy_check_mark:|
+|Homer Dashboard|https://github.com/bastienwirtz/homer|apps.domain.example|Dashboard for all apps|:heavy_check_mark:|
 
 ## Configuration
-WIP -
+
+The main configuration files for TWIO are as follows.
+**./init/new-server.sh**: 
+Run once to:
+- Import .env vars to for docker-compose up
+- Locally clone any repositories necessary for docker-compose up
+- Setup without storing user passwords for, for example, MariaDB
+- Init Docker networks
+- Setup and enable systemd service for startup.sh
+- Run startup.sh
+
+**./init/docker-compose.yml**:
+https://docs.docker.com/compose/
+
+**./init/db/01.sql**:
+Default init file for MariaDB. Creates necessary databases and grants user priviledges.
 
 The included .env file contains the following variables:
 
