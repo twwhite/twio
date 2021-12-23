@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Setup db-init file for docker-compose (from template; see sed password replacements below)
+cp -f ./db-init/01.sql.bak ./db-init/01.sql
+
 # Import .env vars -> Carries over to docker-compose.yml
 FILE=./.env
 
@@ -13,28 +16,45 @@ fi
 
 # Get and init PicoCMS
 curl -sSL https://getcomposer.org/installer | php
-rm -rf ../../apps/picocms/html
-git clone --depth 1 $PICO_COMPOSER_REPOSITORY ../../apps/picocms/html
-php composer.phar --working-dir=../../apps/picocms/html/ install
+rm -rf ${ROOT_DIR}/apps/picocms/html
+git clone --depth 1 $PICO_COMPOSER_REPOSITORY ${ROOT_DIR}/apps/picocms/html
+php composer.phar --working-dir=${ROOT_DIR}/apps/picocms/html/ install
 
 # User input passwords (no storage)
+## NEXTCLOUD MARIADB ROOT USERPASS
 while :
 do
-        read -s -p $"Enter a MariaDB root password: " pass1
+        read -s -p $"(1/3) Enter a MariaDB root password: " pass1
         read -r -e -s -p $'\nVerify password: ' pass2
         if [ "$pass1" == "$pass2" ]; then break; else echo $'\nPasswords did not match'; fi
 done
 NEXTCLOUD_MARIADB_ROOT_PASSWORD="$pass1"
 export NEXTCLOUD_MARIADB_ROOT_PASSWORD
+
+## NEXTCLOUD DB USERPASS
 while :
 do
 	echo
-        read -s -p $"Enter a Nextcloud DB user password: " pass3
+        read -s -p $"(2/3) Enter a Nextcloud DB user password: " pass3
         read -r -e -s -p $'\nVerify password: ' pass4
         if [ "$pass3" == "$pass4" ]; then break; else echo $'\nPasswords did not match'; fi
 done
 NEXTCLOUD_MARIADB_NEXTCLOUDPASS="$pass3"
 export NEXTCLOUD_MARIADB_NEXTCLOUDPASS
+
+## KANBOARD DB USERPASS
+while :
+do
+	echo
+        read -s -p $"(3/3) Enter a Kanboard DB user password: " pass5
+        read -r -e -s -p $'\nVerify password: ' pass6
+        if [ "$pass5" == "$pass6" ]; then break; else echo $'\nPasswords did not match'; fi
+done
+KANBOARD_MARIADB_PASSWORD="$pass6"
+export KANBOARD_MARIADB_PASSWORD
+sed -i "s/kanboardpasswordplaceholder/${pass6}/" ./db-init/01.sql
+sed -i "s/kanboardpasswordplaceholder/${pass6}/" ${ROOT_DIR}/apps/kanboard/config/config.php
+echo
 
 
 # Setup Docker networks
@@ -52,3 +72,6 @@ sudo systemctl enable twio.service
 # Start up TWIO services
 sudo systemctl start twio.service
 ./startup.sh
+echo
+read -p 'Remove local plain-text password containing files (y/n)?  ' ans
+if ans="y"; then rm ./db-init/01.sql; fi
