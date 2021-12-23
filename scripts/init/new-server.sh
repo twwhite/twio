@@ -52,7 +52,9 @@ do
 done
 KANBOARD_MARIADB_PASSWORD="$pass6"
 export KANBOARD_MARIADB_PASSWORD
+
 sed -i "s/kanboardpasswordplaceholder/${pass6}/" ./db-init/01.sql
+echo
 sudo sed -i "s/kanboardpasswordplaceholder/${pass6}/" ${ROOT_DIR}/apps/kanboard/config/config.php
 echo
 
