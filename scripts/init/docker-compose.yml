@@ -45,7 +45,6 @@ services:
     volumes:
       - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
       - ${ROOT_DIR}/apps/standardnotes/html:/usr/share/nginx/standardnotes/html
-#      - ${PICO_DATA_DIR}/*:/usr/share/nginx/picocms/html/*
       - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
       - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
       - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
@@ -137,40 +136,37 @@ services:
 #      - VIRTUAL_HOST=tasks.${DOMAIN}
 #      - LETSENCRYPT_HOST=tasks.${DOMAIN}    nextcloud-app:
 
-#  db:
-#    image: mariadb
-#    container_name: db
+  db:
+    image: mariadb
+    container_name: db
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --skip-innodb-read-only-compressed 
+    environment: 
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_NEXTCLOUDPASS}
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
+      - ${ROOT_DIR}/db:/var/lib/mysql
+    networks:
+      - cloud-internal
+      - net
+
+#  nextcloud-app:
+#    image: nextcloud:fpm
+#    container_name: nextcloud-app
 #    restart: always
-#    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --skip-innodb-read-only-compressed 
-#    secrets:
-#      - root_db_password
-#      - nextcloud_db_password
-#    environment: 
-#      - MYSQL_ROOT_PASSWORD=/run/secrets/root_db_password
-#      - MYSQL_DATABASE=nextcloud
-#      - MYSQL_USER=nextclouduser
-#      - MYSQL_PASSWORD=/run/secrets/nextcloud_db_password
 #    volumes:
-#      - ./db-init:/docker-entrypoint-initdb.d
+#      - nc:/var/www/html
 #      - ${ROOT_DIR}/db:/var/lib/mysql
+#    environment:
+#      - MYSQL_HOST: "db"
+#      - MYSQL_DATABASE: nextcloud
+#      - MYSQL_USER: root
+#      - MYSQL_PASSWORD: nopassword
 #    networks:
 #      - cloud-internal
-#      - net
-
- # nextcloud-app:
- #   image: nextcloud:fpm
- #   container_name: nextcloud-app
- #   restart: always
- #   volumes:
- #     - nc:/var/www/html
- #     - ${ROOT_DIR}/db:/var/lib/mysql
- #   environment:
- #     - MYSQL_HOST: "db"
- #     - MYSQL_DATABASE: nextcloud
- #     - MYSQL_USER: root
- #     - MYSQL_PASSWORD: nopassword
- #   networks:
- #     - cloud-internal
 
 #  nextcloud-web:
 #    image: nginx
@@ -190,18 +186,18 @@ services:
 #    depends_on:
 #      - nextcloud-app
 
-#  adminer:
-#    image: adminer
-#    container_name: adminer
-#    restart: always
-#    ports:
-#      - 8088:8080
-#    networks:
-#      - net
-#      - cloud-internal
-#    environment:
-#      - VIRTUAL_HOST=db.${DOMAIN}
-#      - LETSENCRYPT_HOST=db.${DOMAIN}
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - 8088:8080
+    networks:
+      - net
+      - cloud-internal
+    environment:
+      - VIRTUAL_HOST=db.${DOMAIN}
+      - LETSENCRYPT_HOST=db.${DOMAIN}
 
 volumes:
   conf:
@@ -223,11 +219,7 @@ networks:
     driver: bridge
 
 secrets:
-#  root_db_password:
-#    external: true
-#  nextcloud_db_password:
-#    external: true
-  root_db_password:
-    file: root_db_password.txt
-  nextcloud_db_password:
-    file: ./secrets/nextcloud_db_password.txt
+  pw_mariadbroot:
+    file: /twio/scripts/init/secrets/database_root_pass.txt
+  pw_nextcloud:
+    file: /twio/scripts/init/secrets/database_nextcloud_pass.txt
