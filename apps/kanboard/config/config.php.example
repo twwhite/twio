@@ -5,6 +5,6 @@ define('DB_DRIVER', 'mysql');
 
 // MySQL parameters
 define('DB_USERNAME', 'kanboard');
-define('DB_PASSWORD', 'temppass123');
+define('DB_PASSWORD', 'kanboardpasswordplaceholder');
 define('DB_HOSTNAME', 'db');
 define('DB_NAME', 'kanboard');
