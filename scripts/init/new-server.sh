@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Setup db-init file for docker-compose (from template; see sed password replacements below)
-cp -f ./db-init/01.sql.bak ./db-init/01.sql
-
-# Setup kanboard config file. Note: Plaintext pw stored; be careful not to sync this file, only sync the example.
-sudo cp -f ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
-
 # Import .env vars -> Carries over to docker-compose.yml
 FILE=./.env
 
@@ -16,6 +10,12 @@ else
   echo "Please setup a .env file according to the README.md"
   exit 1
 fi
+
+# Setup kanboard config file. Note: Plaintext pw stored; be careful not to sync this file, only sync the example.
+sudo cp -p -f ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
+
+# Setup db-init file for docker-compose (from template; see sed password replacements below)
+cp -f ./db-init/01.sql.bak ./db-init/01.sql
 
 # Get and init PicoCMS
 curl -sSL https://getcomposer.org/installer | php
