@@ -5,6 +5,10 @@ define('DB_DRIVER', 'mysql');
 
 // MySQL parameters
 define('DB_USERNAME', 'kanboard');
+
+// TWIO NOTE: THIS VALUE UPDATED AUTOMATICALLY. DO NOT UPDATE MANUALLY.
+// Longer reason - the new-server script copies the password to the /scripts/init/db-init/01.sql as well, so these two values must match
 define('DB_PASSWORD', 'kanboardpasswordplaceholder');
+
 define('DB_HOSTNAME', 'db');
 define('DB_NAME', 'kanboard');
