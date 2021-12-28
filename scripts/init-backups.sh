@@ -1,25 +1,27 @@
-#! /usr/bin/env bash
+#!/bin/bash
+FILE=./.env
+if [ -f $FILE ]; then
+  echo ".env file exists; exporting vars"
+  export $(cat .env | xargs)
+else
+  echo "Please setup a .env file according to the README.md"
+  exit 1
+fi
 
-# TODO - convert to twio ecosystem
+get_available_space() {
+  str_available_space=$(df -h "."  | awk 'NR==2{print $4}')
+  echo "Available disk space: "$str_available_space
+}
 
-#archive_name="$(hostname)-$(date -Iseconds | cut -d '+' -f 1)"
-#sudo mysqldump --all-databases > /twiodbdata/all-dbs-mysqldump.sql
-#borg_options="--stats --compression zlib"
-#borg create ${borg_options} /twiodata/backups::${archive_name} \
-#  /twiodata/tim/ \
-#  /var/www/ \
-#  /etc/nginx/sites-available/ \
-#  /twiodbdata/
+install_borg() {
+  echo "Checking if borgbackup installed..."
+  hash borg 2>/dev/null || { sudo apt install borgbackup; :; }
+}
 
-#borg prune \
-#  --stats \
-#  --keep-daily 14 \
-#  --keep-weekly 4 \
-#  --keep-monthly 6 \
-#  --keep-yearly -1 \
-#  /twiodata/backups
+init_borg_repo(){
+  borg init --encryption=repokey /path/to/repo
+}
 
-#sudo rclone sync /twiodata/backups b2:twio-data-backup
-#sudo rclone cleanup b2:twio-data-backup
 
-#sudo echo "Successfully backed up: ${archive_name}" >> /var/log/backup.log
+get_available_space
+install_borg
