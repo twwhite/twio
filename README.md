@@ -16,7 +16,7 @@
 ## Included Applications
 
 |Application|Source  |Destination |Description| Operational | Backups Working |
---- | --- | ---|---| --- |
+--- | --- | ---|---| --- | --- |
 |PicoCMS|https://github.com/picocms/Pico|domain.example|Flat file CMS| :heavy_check_mark: | |
 |Nextcloud|https://github.com/nextcloud/server|cloud.domain.example|Data servver & cloud app suite| :heavy_check_mark:| |
 |Kanboard|https://github.com/kanboard/kanboard|todo.domain.example|Kanban project management tool|:heavy_check_mark:| |
