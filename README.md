@@ -8,21 +8,22 @@
 <p align="center">
   <a href="#included-applications">Default Applications</a> •
   <a href="#configuration">Configuration</a> •
-  <a href="#download">Download</a>
+  <a href="#download">Download</a> •
+  <a href="#backups">Backing up your data</a>
 </p>
 
 
 ## Included Applications
 
-|Application|Source  |Destination |Description| What's Working |
+|Application|Source  |Destination |Description| Operational | Backups Working |
 --- | --- | ---|---| --- |
-|PicoCMS|https://github.com/picocms/Pico|domain.example|Flat file CMS| :heavy_check_mark: |
-|StandardNotes sync-server|https://github.com/standardnotes/syncing-server-js|notes-sync.domain.example|Encrypted notes syncing server| WIP |
-|StandardNotes web app|https://github.com/standardnotes/web |notes.domain.example|Encrypted notes app| WIP|
-|Nextcloud|https://github.com/nextcloud/server|cloud.domain.example|Data servver & cloud app suite| WIP|
-|Kanboard|https://github.com/kanboard/kanboard|todo.domain.example|Kanban project management tool|:heavy_check_mark:|
-|DokuWiki|https://www.dokuwiki.org/dokuwiki|wiki.domain.example|Self-hosted databaseless Wiki|:heavy_check_mark:|
-|Homer Dashboard|https://github.com/bastienwirtz/homer|apps.domain.example|Dashboard for all apps|:heavy_check_mark:|
+|PicoCMS|https://github.com/picocms/Pico|domain.example|Flat file CMS| :heavy_check_mark: | |
+|Nextcloud|https://github.com/nextcloud/server|cloud.domain.example|Data servver & cloud app suite| :heavy_check_mark:| |
+|Kanboard|https://github.com/kanboard/kanboard|todo.domain.example|Kanban project management tool|:heavy_check_mark:| |
+|DokuWiki|https://www.dokuwiki.org/dokuwiki|wiki.domain.example|Self-hosted databaseless Wiki|:heavy_check_mark:| |
+|Homer Dashboard|https://github.com/bastienwirtz/homer|apps.domain.example|Dashboard for all apps|:heavy_check_mark:| |
+|StandardNotes sync-server|https://github.com/standardnotes/syncing-server-js|notes-sync.domain.example|Encrypted notes syncing server| WIP | |
+|StandardNotes web app|https://github.com/standardnotes/web |notes.domain.example|Encrypted notes app| WIP| |
 
 ## Configuration
 
