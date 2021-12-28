@@ -77,6 +77,8 @@ $ ./new-server.sh
 
 Note: You may need to modify file permissions to permit execute by running chmod +x.
 
+## Backing up your Data
+WIP
 
 ## License
 
