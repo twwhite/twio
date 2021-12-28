@@ -11,11 +11,16 @@ else
   exit 1
 fi
 
+
 # Setup kanboard config file. Note: Plaintext pw stored; be careful not to sync this file, only sync the example.
-sudo cp -p -f ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
+sudo rm -f ${ROOT_DIR}/apps/kanboard/config/config.php
+sudo cp -i ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
+
+echo
 
 # Setup db-init file for docker-compose (from template; see sed password replacements below)
-cp -f ./db-init/01.sql.bak ./db-init/01.sql
+sudo rm -f ./db-init/01.sql
+sudo cp ./db-init/01.sql.bak ./db-init/01.sql
 
 # Get and init PicoCMS
 curl -sSL https://getcomposer.org/installer | php
@@ -54,7 +59,7 @@ do
         if [ "$pass5" == "$pass6" ]; then break; else echo $'\nPasswords did not match'; fi
 done
 KANBOARD_MARIADB_PASSWORD="$pass6"
-export KANBOARD_MARIADB_PASSWORD
+#export KANBOARD_MARIADB_PASSWORD
 
 sed -i "s/kanboardpasswordplaceholder/${pass6}/" ./db-init/01.sql
 echo
@@ -77,6 +82,33 @@ sudo systemctl enable twio.service
 # Start up TWIO services
 sudo systemctl start twio.service
 ./startup.sh
+
+function dbIsReady() {
+  docker-compose logs db | grep "MariaDB init process done. Ready for start up."
+}
+
+MAX_TRIES=10
+
+function waitUntilServiceIsReady() {
+  attempt=1
+  while [ $attempt -le $MAX_TRIES ]
+  do
+    if "$@"; then
+      echo "$2 container is up!"
+      break
+    fi
+    echo "Waiting for $2 container... (attempt: $((attempt++)))"
+    sleep 5
+  done
+
+  if [ $attempt -gt $MAX_TRIES ]; then
+    echo "Error: $2 not responding, cancelling set up"
+    exit 1
+  fi
+}
+
+waitUntilServiceIsReady dbIsReady "MariaDB"
+
 echo
 read -p 'Remove local plain-text password containing files (y/n)?  ' ans
 if ans="y"; then rm ./db-init/01.sql; fi
