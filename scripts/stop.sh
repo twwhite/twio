@@ -1,3 +1,3 @@
 #!/bin/bash
-cd /twio/scripts/init/
+cd /twio/scripts/
 docker-compose down

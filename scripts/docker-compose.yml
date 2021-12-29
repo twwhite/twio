@@ -218,9 +218,3 @@ networks:
     driver: bridge
   php-internal:
     driver: bridge
-
-secrets:
-  pw_mariadbroot:
-    file: /twio/scripts/init/secrets/database_root_pass.txt
-  pw_nextcloud:
-    file: /twio/scripts/init/secrets/database_nextcloud_pass.txt
