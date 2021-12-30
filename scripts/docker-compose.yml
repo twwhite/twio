@@ -51,25 +51,24 @@ services:
       - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
       - ${PICO_DATA_DIR}/config:/usr/share/nginx/picocms/html/config
 
-# pico-cms:
-#   image: nginx
-#   container_name: ${DOMAIN}
-#   volumes:
-#     - ${ROOT_DIR}/apps/picocms/conf.d:/etc/nginx/conf.d
-#     - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
-#     - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
-#     - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
-#     - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
-#     - ${PICO_DATA_DIR}/config:/usr/share/nginx/picocms/html/config
-#
-#   networks:
-#     - php-internal
-#     - net
-#   depends_on:
-#     - php
-#   environment:
-#     - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN}
-#     - LETSENCRYPT_HOST=${DOMAIN},www.${DOMAIN}
+  pico-cms:
+    image: nginx
+    container_name: ${DOMAIN}
+    volumes:
+      - ${ROOT_DIR}/apps/picocms/conf.d:/etc/nginx/conf.d
+      - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
+      - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
+      - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
+      - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
+      - ${PICO_DATA_DIR}/config:/usr/share/nginx/picocms/html/config
+    networks:
+      - php-internal
+      - net
+    depends_on:
+      - php
+    environment:
+      - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN}
+      - LETSENCRYPT_HOST=${DOMAIN},www.${DOMAIN}
 
 #  standard-notes:
 #    image: nginx
@@ -187,18 +186,18 @@ services:
     depends_on:
       - nextcloudapp
 
-  adminer:
-    image: adminer
-    container_name: adminer
-    restart: always
-    ports:
-      - 8088:8080
-    networks:
-      - net
-      - cloud-internal
-    environment:
-      - VIRTUAL_HOST=db.${DOMAIN}
-      - LETSENCRYPT_HOST=db.${DOMAIN}
+  # adminer:
+  #   image: adminer
+  #   container_name: adminer
+  #   restart: always
+  #   ports:
+  #     - 8088:8080
+  #   networks:
+  #     - net
+  #     - cloud-internal
+  #   environment:
+  #     - VIRTUAL_HOST=db.${DOMAIN}
+  #     - LETSENCRYPT_HOST=db.${DOMAIN}
 
 volumes:
   conf:

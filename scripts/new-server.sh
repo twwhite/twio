@@ -13,6 +13,7 @@ fi
 
 
 # Setup kanboard config file. Note: Plaintext pw stored; be careful not to sync this file, only sync the example.
+# TO-DO -> Switch from linked local directory to copying config file into Docker container at init.
 sudo rm -f ${ROOT_DIR}/apps/kanboard/config/config.php
 sudo cp -i ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
 
@@ -32,7 +33,7 @@ php composer.phar --working-dir=${ROOT_DIR}/apps/picocms/html/ install
 ## NEXTCLOUD MARIADB ROOT USERPASS
 while :
 do
-        read -s -p $"(1/3) Enter a MariaDB root password: " pass1
+        read -s -p $"(1/4) Enter a MariaDB root password: " pass1
         read -r -e -s -p $'\nVerify password: ' pass2
         if [ "$pass1" == "$pass2" ]; then break; else echo $'\nPasswords did not match'; fi
 done
@@ -43,29 +44,40 @@ export NEXTCLOUD_MARIADB_ROOT_PASSWORD
 while :
 do
 	echo
-        read -s -p $"(2/3) Enter a Nextcloud DB user password: " pass3
+        read -s -p $"(2/4) Enter a Nextcloud DB user password: " pass3
         read -r -e -s -p $'\nVerify password: ' pass4
         if [ "$pass3" == "$pass4" ]; then break; else echo $'\nPasswords did not match'; fi
 done
 NEXTCLOUD_MARIADB_NEXTCLOUDPASS="$pass3"
 export NEXTCLOUD_MARIADB_NEXTCLOUDPASS
+echo "NEXTCLOUD_DB_PASS=$NEXTCLOUD_MARIADB_NEXTCLOUDPASS">>.env
 
 ## KANBOARD DB USERPASS
 while :
 do
 	echo
-        read -s -p $"(3/3) Enter a Kanboard DB user password: " pass5
+        read -s -p $"(3/4) Enter a Kanboard DB user password: " pass5
         read -r -e -s -p $'\nVerify password: ' pass6
         if [ "$pass5" == "$pass6" ]; then break; else echo $'\nPasswords did not match'; fi
 done
 KANBOARD_MARIADB_PASSWORD="$pass6"
 #export KANBOARD_MARIADB_PASSWORD
 
+## BORG BACKUP PASSPHRASE
+while :
+do
+	echo
+        read -s -p $"(4/4) Enter a Borg Backup Repositor password: " pass7
+        read -r -e -s -p $'\nVerify password: ' pass8
+        if [ "$pass7" == "$pass8" ]; then break; else echo $'\nPasswords did not match'; fi
+done
+BORG_PASSPHRASE="$pass7"
+echo "BORG_PASSPHRASE=$BORG_PASSPHRASE">>.env
+
 sed -i "s/kanboardpasswordplaceholder/${pass6}/" ./db-init/01.sql
 echo
 sudo sed -i "s/kanboardpasswordplaceholder/${pass6}/" ${ROOT_DIR}/apps/kanboard/config/config.php
 echo
-
 
 # Setup Docker networks
 docker network create --driver bridge net || true
@@ -110,5 +122,9 @@ function waitUntilServiceIsReady() {
 waitUntilServiceIsReady dbIsReady "MariaDB"
 
 echo
-read -p 'Remove local plain-text password containing files (y/n)?  ' ans
+read -p 'Remove local plain-text password containing DB-init file (y/n)?  ' ans
 if ans="y"; then rm ./db-init/01.sql; fi
+
+echo
+# echo 'Starting init-backup script...'
+# sudo bash ./init-backups.sh
