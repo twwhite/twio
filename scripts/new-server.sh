@@ -1,109 +1,95 @@
 #!/bin/bash
 
-# Import .env vars -> Carries over to docker-compose.yml
-FILE=./.env
+import_env(){
+  # Import .env vars -> Carries over to docker-compose.yml
+  FILE=./.env
 
-if [ -f $FILE ]; then
-  echo ".env file exists; exporting vars"
-  export $(cat .env | xargs)
-else
-  echo "Please setup a .env file according to the README.md"
-  exit 1
-fi
+  if [ -f $FILE ]; then
+    echo "Loading variables from $FILE"
+    export $(cat .env | xargs)
+  else
+    echo "Please setup a .env file according to the README.md"
+    exit 1
+  fi
+}
 
+init_config_files(){
+  # Setup kanboard config file. Note: Plaintext pw stored; be careful not to sync this file, only sync the example.
+  # TO-DO -> Switch from linked local directory to copying config file into Docker container at init.
+  sudo rm -f ${ROOT_DIR}/apps/kanboard/config/config.php
+  sudo cp -i ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
 
-# Setup kanboard config file. Note: Plaintext pw stored; be careful not to sync this file, only sync the example.
-# TO-DO -> Switch from linked local directory to copying config file into Docker container at init.
-sudo rm -f ${ROOT_DIR}/apps/kanboard/config/config.php
-sudo cp -i ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
+  # Setup db-init file for docker-compose (from template; see sed password replacements below)
+  sudo rm -f ./db-init/01.sql
+  sudo cp ./db-init/01.sql.bak ./db-init/01.sql
+}
 
-echo
+get_init_pico(){
+  # Get and init PicoCMS
+  curl -sSL https://getcomposer.org/installer | php
+  rm -rf ${ROOT_DIR}/apps/picocms/html
+  git clone --depth 1 $PICO_COMPOSER_REPOSITORY ${ROOT_DIR}/apps/picocms/html
+  php composer.phar --working-dir=${ROOT_DIR}/apps/picocms/html/ install
+}
 
-# Setup db-init file for docker-compose (from template; see sed password replacements below)
-sudo rm -f ./db-init/01.sql
-sudo cp ./db-init/01.sql.bak ./db-init/01.sql
+setup_secrets(){
+  echo
+  declare -A secretsArray
+  keys=("DB_ROOT_PASS" "DB_NEXTCLOUD_PASS" "DB_KANBOARD_PASS" "BORG_PASS")
+  numKeys=${#keys[@]}
+  i=1
+  for str in "${keys[@]}"; do
+    if grep -Gq "$str*" "$FILE"
+    then
+      read -e -p "$str exists, overwrite (y/N)?  " c
+      if ! [ $"$c" == "y" ]; then continue; fi
+    fi
+    while :
+    do
+      read -s -p $"($i/$numKeys) Please enter a password for $str: " a
+      read -r -e -s -p $'\nConfirm password: ' b
+      if [ "$a" == "$b" ]; then break; else echo $'\nPasswords did not match'; fi
+    done
+    secretsArray[$str]=$a
+    echo "$str=$a">>.env
+    i=$(($i+1))
+    echo
+  done
+  import_env
+}
 
-# Get and init PicoCMS
-curl -sSL https://getcomposer.org/installer | php
-rm -rf ${ROOT_DIR}/apps/picocms/html
-git clone --depth 1 $PICO_COMPOSER_REPOSITORY ${ROOT_DIR}/apps/picocms/html
-php composer.phar --working-dir=${ROOT_DIR}/apps/picocms/html/ install
+kanboard_db_init(){
+  sed -i "s/kanboardpasswordplaceholder/${DB_KANBOARD_PASS}/" ./db-init/01.sql
+  echo
+  sudo sed -i "s/kanboardpasswordplaceholder/${DB_KANBOARD_PASS}/" ${ROOT_DIR}/apps/kanboard/config/config.php
+  echo
+}
 
-# User input passwords (no storage)
-## NEXTCLOUD MARIADB ROOT USERPASS
-while :
-do
-        read -s -p $"(1/4) Enter a MariaDB root password: " pass1
-        read -r -e -s -p $'\nVerify password: ' pass2
-        if [ "$pass1" == "$pass2" ]; then break; else echo $'\nPasswords did not match'; fi
-done
-NEXTCLOUD_MARIADB_ROOT_PASSWORD="$pass1"
-export NEXTCLOUD_MARIADB_ROOT_PASSWORD
+setup_docker_networks(){
+  # Setup Docker networks
+  docker network create --driver bridge net || true
+  docker network create --driver bridge cloud-internal || true
+  docker network create --driver bridge php-internal || true
 
-## NEXTCLOUD DB USERPASS
-while :
-do
-	echo
-        read -s -p $"(2/4) Enter a Nextcloud DB user password: " pass3
-        read -r -e -s -p $'\nVerify password: ' pass4
-        if [ "$pass3" == "$pass4" ]; then break; else echo $'\nPasswords did not match'; fi
-done
-NEXTCLOUD_MARIADB_NEXTCLOUDPASS="$pass3"
-export NEXTCLOUD_MARIADB_NEXTCLOUDPASS
-echo "NEXTCLOUD_DB_PASS=$NEXTCLOUD_MARIADB_NEXTCLOUDPASS">>.env
+}
 
-## KANBOARD DB USERPASS
-while :
-do
-	echo
-        read -s -p $"(3/4) Enter a Kanboard DB user password: " pass5
-        read -r -e -s -p $'\nVerify password: ' pass6
-        if [ "$pass5" == "$pass6" ]; then break; else echo $'\nPasswords did not match'; fi
-done
-KANBOARD_MARIADB_PASSWORD="$pass6"
-#export KANBOARD_MARIADB_PASSWORD
+setup_systemd_services(){
+  # Setup Systemd service for persistent reboots
+  sudo cp ./systemd/twio.service /etc/systemd/system/
+  sudo systemctl daemon-reload
+  sudo systemctl enable twio.service
+  # Start up TWIO services
+  sudo systemctl start twio.service
+}
 
-## BORG BACKUP PASSPHRASE
-while :
-do
-	echo
-        read -s -p $"(4/4) Enter a Borg Backup Repositor password: " pass7
-        read -r -e -s -p $'\nVerify password: ' pass8
-        if [ "$pass7" == "$pass8" ]; then break; else echo $'\nPasswords did not match'; fi
-done
-BORG_PASSPHRASE="$pass7"
-echo "BORG_PASSPHRASE=$BORG_PASSPHRASE">>.env
-
-sed -i "s/kanboardpasswordplaceholder/${pass6}/" ./db-init/01.sql
-echo
-sudo sed -i "s/kanboardpasswordplaceholder/${pass6}/" ${ROOT_DIR}/apps/kanboard/config/config.php
-echo
-
-# Setup Docker networks
-docker network create --driver bridge net || true
-docker network create --driver bridge cloud-internal || true
-docker network create --driver bridge php-internal || true
-
-#docker network create --driver overlay net-overlay
-
-# Setup Systemd service for persistent reboots
-sudo cp ./systemd/twio.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable twio.service
-
-# Start up TWIO services
-sudo systemctl start twio.service
-./startup.sh
-
-function dbIsReady() {
+dbIsReady() {
   docker-compose logs db | grep "MariaDB init process done. Ready for start up."
 }
 
-MAX_TRIES=10
-
-function waitUntilServiceIsReady() {
+waitUntilServiceIsReady() {
   attempt=1
-  while [ $attempt -le $MAX_TRIES ]
+  # Try 10 times
+  while [ $attempt -le 10 ]
   do
     if "$@"; then
       echo "$2 container is up!"
@@ -119,12 +105,30 @@ function waitUntilServiceIsReady() {
   fi
 }
 
-waitUntilServiceIsReady dbIsReady "MariaDB"
+cleanup(){
+  read -p 'Remove local plain-text password containing DB-init file (y/n)?  ' ans
+  if ans="y"; then rm ./db-init/01.sql; fi
+}
 
-echo
-read -p 'Remove local plain-text password containing DB-init file (y/n)?  ' ans
-if ans="y"; then rm ./db-init/01.sql; fi
+launch() {
+  ./startup.sh
+}
 
-echo
-# echo 'Starting init-backup script...'
-# sudo bash ./init-backups.sh
+init_backups(){
+  :
+  # echo 'Starting init-backup script...'
+  # sudo bash ./init-backups.sh
+}
+
+import_env
+# init_config_files
+# get_init_pico
+setup_secrets
+echo $DB_NEXTCLOUD_PASS
+# kanboard_db_init
+# setup_docker_networks
+# setup_systemd_services
+# launch
+# waitUntilServiceIsReady dbIsReady "MariaDB"
+# cleanup
+# init_backups

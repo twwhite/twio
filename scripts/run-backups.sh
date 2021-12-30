@@ -47,7 +47,6 @@ stage_nextcloud(){
    ${ROOT_DIR}/backups/tmp/data \
    ${ROOT_DIR}/backups/tmp/themes \
    ${ROOT_DIR}/backups/tmp/config  \
-   ${ROOT_DIR}/tim/files/Apps/pico # \ Add custom directories here (include backslash+new line)
 
    echo "Removing local copies of data"
    sudo rm -rf ${ROOT_DIR}/backups/tmp && sudo mkdir ${ROOT_DIR}/backups/tmp
