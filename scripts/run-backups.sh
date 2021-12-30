@@ -1,4 +1,8 @@
 #!/bin/bash
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "Not running as root"
+    exit
+fi
 
 # TODO - convert to twio ecosystem
 FILE=./.env
@@ -39,7 +43,7 @@ stage_nextcloud(){
   archive_name="$(hostname)-$(date -Iseconds | cut -d '+' -f 1)"
   borg_options="--stats --compression zlib"
   echo "Creating ${ROOT_DIR}/backups/borg-repo::${archive_name}-nextcloud"
-  sudo borg create ${borg_options} ${ROOT_DIR}/backups/borg-repo::${archive_name}"-nextcloud" \
+  sudo BORG_PASSPHRASE=${BORG_PASS} borg create ${borg_options} ${ROOT_DIR}/backups/borg-repo::${archive_name}"-nextcloud" \
    ${ROOT_DIR}/backups/tmp/data \
    ${ROOT_DIR}/backups/tmp/themes \
    ${ROOT_DIR}/backups/tmp/config  \
@@ -53,7 +57,7 @@ stage_nextcloud(){
 }
 
 prune_borg(){
-  sudo borg prune \
+  sudo BORG_PASSPHRASE=${BORG_PASS} borg prune \
    --stats \
    --keep-daily 14 \
    --keep-weekly 4 \
@@ -63,5 +67,5 @@ prune_borg(){
 }
 
 stage_nextcloud
-#prune_borg
-echo "Successfully backed up: ${archive_name}" >> /home/$USER/backups.log
+prune_borg
+echo "Successfully backed up: ${archive_name}" >> ${ROOT_DIR}/scripts/logs/backups.log
