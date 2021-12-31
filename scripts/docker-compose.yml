@@ -67,7 +67,7 @@ services:
     depends_on:
       - php
     environment:
-      - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN},certs.${DOMAIN}
+      - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN}
       - LETSENCRYPT_HOST=www.${DOMAIN},${DOMAIN},certs.${DOMAIN}
 
 #  standard-notes:
@@ -82,36 +82,36 @@ services:
 #      - VIRTUAL_HOST=notes.${DOMAIN}
 #      - LETSENCRYPT_HOST=notes.${DOMAIN}
 
-  #(working)
-  # homer-dashboard:
-  #   image: b4bz/homer
-  #   container_name: apps.${DOMAIN}
-  #   volumes:
-  #     - ${HOMER_DATA_DIR:-${ROOT_DIR}/apps/homer-dashboard/public/assets}:/www/assets
-  #   ports:
-  #     - 8080:8080
-  #   networks:
-  #     - "net"
-  #   environment:
-  #     - VIRTUAL_HOST=apps.${DOMAIN}
-  #     - LETSENCRYPT_HOST=apps.${DOMAIN}
+  ## (working)
+  homer-dashboard:
+    image: b4bz/homer
+    container_name: apps.${DOMAIN}
+    volumes:
+      - ${HOMER_DATA_DIR:-${ROOT_DIR}/apps/homer-dashboard/public/assets}:/www/assets
+    ports:
+      - 8080:8080
+    networks:
+      - "net"
+    environment:
+      - VIRTUAL_HOST=apps.${DOMAIN}
+      - LETSENCRYPT_HOST=apps.${DOMAIN}
 
-  #  (Operations = Working; Backups = WIP)
-  # kanboard:
-  #   image: kanboard/kanboard:latest
-  #   container_name: kanboard
-  #   depends_on:
-  #     - "acme-companion"
-  #   environment:
-  #     - VIRTUAL_HOST=tasks.${DOMAIN}
-  #     - LETSENCRYPT_HOST=tasks.${DOMAIN}
-  #   networks:
-  #     - "net"
-  #   ports:
-  #     - "8083:80"
-  #     - "8084:443"
-  #   volumes:
-  #     - ${ROOT_DIR}/apps/kanboard/config/config.php:/var/www/app/config.php
+  ## (Operations = Working; Backups = WIP)
+  kanboard:
+    image: kanboard/kanboard:latest
+    container_name: kanboard
+    depends_on:
+      - "acme-companion"
+    environment:
+      - VIRTUAL_HOST=tasks.${DOMAIN}
+      - LETSENCRYPT_HOST=tasks.${DOMAIN}
+    networks:
+      - "net"
+    ports:
+      - "8083:80"
+      - "8084:443"
+    volumes:
+      - ${ROOT_DIR}/apps/kanboard/config/config.php:/var/www/app/config.php
 
   #(working)
   # dokuwiki:
