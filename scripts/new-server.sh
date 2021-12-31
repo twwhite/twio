@@ -12,33 +12,46 @@ import_env(){
     exit 1
   fi
 
-  echo $PICO_DATA_DIR
-
+  echo "Variables loaded!"
 }
 
 init_config_files(){
+
   # Setup kanboard config file. Note: Plaintext pw stored; be careful not to sync this file, only sync the example.
   # TO-DO -> Switch from linked local directory to copying config file into Docker container at init.
+  echo "Setting up Kanboard config file."
   sudo rm -f ${ROOT_DIR}/apps/kanboard/config/config.php
   sudo cp -i ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
 
-  # Setup db-init file for docker-compose (from template; see sed password replacements below)
-  sudo rm -f ./db-init/01.sql
-  sudo cp ./db-init/01.sql.bak ./db-init/01.sql
-
   # Setup homer dashbaord config file.
+  echo "Setting up Homer config file."
   sudo rm -r ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf 2> /dev/null
   sudo cp -i ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf.example ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf
   sudo sed -i "s/SERVERNAMEPLACEHOLDER/${DOMAIN}/" ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf
 
+  # Setup db-init file for docker-compose (from template; see sed password replacements below)
+  echo "Setting up DB-init file(s)."
+  sudo rm -f ./db-init/01.sql
+  sudo cp ./db-init/01.sql.bak ./db-init/01.sql
+
+  echo "Config files init complete."
 }
 
 get_init_pico(){
+  echo "Initiating PicoCMS"
   # Get and init PicoCMS
-  curl -sSL https://getcomposer.org/installer | php
-  rm -rf ${ROOT_DIR}/apps/picocms/html/*
+  if [[ $(find ${ROOT_DIR}/apps/picocms/html -name "*.*") ]]
+  then
+    read -e -p "Files exist in ${ROOT_DIR}/apps/picocms/html. Remove? (y/N)?  " x
+    if [ $"$x" == "y" ]; then sudo rm -rf ${ROOT_DIR}/apps/picocms/html/*; fi
+  fi
   git clone --depth 1 ${PICO_COMPOSER_REPOSITORY:-https://github.com/picocms/pico-composer} ./tmp/pico-composer
+  cp -r ./tmp/pico-composer/* ${ROOT_DIR}/apps/picocms/html/
+  cd ./tmp
+  curl -sS https://getcomposer.org/installer | php
   php composer.phar --working-dir=${ROOT_DIR}/apps/picocms/html/ install
+  cd ${ROOT_DIR}/scripts
+  rm -rf ${ROOT_DIR}/scripts/tmp/*
 }
 
 setup_secrets(){
@@ -88,7 +101,6 @@ setup_docker_networks(){
   docker network create --driver bridge net || true
   docker network create --driver bridge cloud-internal || true
   docker network create --driver bridge php-internal || true
-
 }
 
 setup_systemd_services(){
@@ -99,6 +111,8 @@ setup_systemd_services(){
   sudo systemctl daemon-reload
   echo "Enabling twio.service"
   sudo systemctl enable twio.service
+
+  # sudo systemctl start twio.service
 }
 
 dbIsReady() {
@@ -130,9 +144,10 @@ cleanup(){
 }
 
 launch() {
-  # Start up TWIO services
-  echo "Launching! (This step may take a while, please wait)"
-  sudo systemctl start twio.service
+  echo "Launching! (This step may take a while, please wait...)"
+  ./startup.sh
+  echo "Launch complete."
+
 }
 
 init_backups(){
@@ -149,6 +164,6 @@ kanboard_db_init
 setup_docker_networks
 setup_systemd_services
 launch
-waitUntilServiceIsReady dbIsReady "MariaDB"
+# waitUntilServiceIsReady dbIsReady "MariaDB"
 cleanup
 init_backups

@@ -13,7 +13,7 @@ services:
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - dhparam:/etc/nginx/dhparam
-      - certs:/etc/nginx/certs:ro
+      - ${ROOT_DIR}/certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - net
@@ -24,7 +24,7 @@ services:
     volumes_from:
       - nginx-proxy
     volumes:
-      - certs:/etc/nginx/certs:rw
+      - ${ROOT_DIR}/certs:/etc/nginx/certs:rw
       - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
@@ -67,8 +67,8 @@ services:
     depends_on:
       - php
     environment:
-      - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN}
-      - LETSENCRYPT_HOST=${DOMAIN},www.${DOMAIN}
+      - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN},certs.${DOMAIN}
+      - LETSENCRYPT_HOST=www.${DOMAIN},${DOMAIN},certs.${DOMAIN}
 
 #  standard-notes:
 #    image: nginx
@@ -97,23 +97,21 @@ services:
   #     - LETSENCRYPT_HOST=apps.${DOMAIN}
 
   #  (Operations = Working; Backups = WIP)
-  kanboard:
-    image: kanboard/kanboard:latest
-    container_name: kanboard
-    depends_on:
-      - "acme-companion"
-    environment:
-      - VIRTUAL_HOST=tasks.${DOMAIN}
-      - LETSENCRYPT_HOST=tasks.${DOMAIN}
-    networks:
-      - "net"
-    ports:
-      - "8083:80"
-      - "8084:443"
-    volumes:
-#      - ${ROOT_DIR}/apps/kanboard/data:/var/www/app/data
-#      - ${ROOT_DIR}/apps/kanboard/plugins:/var/www/app/plugins
-      - ${ROOT_DIR}/apps/kanboard/config/config.php:/var/www/app/config.php
+  # kanboard:
+  #   image: kanboard/kanboard:latest
+  #   container_name: kanboard
+  #   depends_on:
+  #     - "acme-companion"
+  #   environment:
+  #     - VIRTUAL_HOST=tasks.${DOMAIN}
+  #     - LETSENCRYPT_HOST=tasks.${DOMAIN}
+  #   networks:
+  #     - "net"
+  #   ports:
+  #     - "8083:80"
+  #     - "8084:443"
+  #   volumes:
+  #     - ${ROOT_DIR}/apps/kanboard/config/config.php:/var/www/app/config.php
 
   #(working)
   # dokuwiki:
@@ -133,54 +131,54 @@ services:
   #   networks:
   #     - "net"
 
-  db:
-    image: mariadb
-    container_name: db
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
-    restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=${DB_NEXTCLOUD_PASS}
-    volumes:
-      - ./db-init:/docker-entrypoint-initdb.d
-      - ${ROOT_DIR}/db:/var/lib/mysql
-    networks:
-      - cloud-internal
-      - net
+  # db:
+  #   image: mariadb
+  #   container_name: db
+  #   command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+  #   restart: always
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
+  #     - MYSQL_USER=nextcloud
+  #     - MYSQL_PASSWORD=${DB_NEXTCLOUD_PASS}
+  #   volumes:
+  #     - ./db-init:/docker-entrypoint-initdb.d
+  #     - ${ROOT_DIR}/db:/var/lib/mysql
+  #   networks:
+  #     - cloud-internal
+  #     - net
 
-  nextcloudapp:
-    image: nextcloud:fpm
-    container_name: nextcloudapp
-    restart: always
-    volumes:
-      - nc:/var/www/html
-      - ${ROOT_DIR}/db:/var/lib/mysql
-    environment:
-      - MYSQL_HOST=db
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=${DB_NEXTCLOUD_PASS}
-    networks:
-      - cloud-internal
-
-  nextcloudweb:
-    image: nginx
-    container_name: nextcloudweb
-    restart: always
-    ports:
-      - 8087:80
-    networks:
-      - net
-      - cloud-internal
-    environment:
-      - VIRTUAL_HOST=cloud.${DOMAIN}
-      - LETSENCRYPT_HOST=cloud.${DOMAIN}
-    volumes:
-      - nc:/var/www/html:ro
-      - ${ROOT_DIR}/apps/nextcloud/conf.d/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - nextcloudapp
+  # nextcloudapp:
+  #   image: nextcloud:fpm
+  #   container_name: nextcloudapp
+  #   restart: always
+  #   volumes:
+  #     - nc:/var/www/html
+  #     - ${ROOT_DIR}/db:/var/lib/mysql
+  #   environment:
+  #     - MYSQL_HOST=db
+  #     - MYSQL_DATABASE=nextcloud
+  #     - MYSQL_USER=nextcloud
+  #     - MYSQL_PASSWORD=${DB_NEXTCLOUD_PASS}
+  #   networks:
+  #     - cloud-internal
+  #
+  # nextcloudweb:
+  #   image: nginx
+  #   container_name: nextcloudweb
+  #   restart: always
+  #   ports:
+  #     - 8087:80
+  #   networks:
+  #     - net
+  #     - cloud-internal
+  #   environment:
+  #     - VIRTUAL_HOST=cloud.${DOMAIN}
+  #     - LETSENCRYPT_HOST=cloud.${DOMAIN}
+  #   volumes:
+  #     - nc:/var/www/html:ro
+  #     - ${ROOT_DIR}/apps/nextcloud/conf.d/nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - nextcloudapp
 
   # adminer:
   #   image: adminer
@@ -200,7 +198,6 @@ volumes:
   vhost:
   html:
   dhparam:
-  certs:
   acme:
   db:
   nc:

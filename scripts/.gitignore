@@ -2,3 +2,4 @@ composer.phar
 .env
 *.json
 tmp/*
+db-init/01.sql
