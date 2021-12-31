@@ -115,22 +115,22 @@ services:
   #     - ${ROOT_DIR}/apps/kanboard/config/config.php:/var/www/app/config.php
 
   #(working)
-  # dokuwiki:
-  #   image: linuxserver/dokuwiki:version-2020-07-29
-  #   container_name: dokuwiki
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ${ROOT_DIR}/apps/dokuwiki/config:/config
-  #     - ${DOKUWIKI_CONF_DIR:-$ROOT_DIR/apps/dokuwiki/conf/}:/config/dokuwiki/conf
-  #     - ${DOKUWIKI_DATA_DIR:-$ROOT_DIR/apps/dokuwiki/data/}:/config/dokuwiki/data
-  #   ports:
-  #     - 8085:443/tcp
-  #     - 8086:80/tcp
-  #   environment:
-  #     - VIRTUAL_HOST=wiki.${DOMAIN}
-  #     - LETSENCRYPT_HOST=wiki.${DOMAIN}
-  #   networks:
-  #     - "net"
+  dokuwiki:
+    image: linuxserver/dokuwiki
+    container_name: dokuwiki
+    restart: unless-stopped
+    volumes:
+      # - ${ROOT_DIR}/apps/dokuwiki/config:/config
+      - ${DOKUWIKI_CONFIG_DIR}:/config/dokuwiki/config
+      - ${DOKUWIKI_DATA_DIR}:/config/dokuwiki/data
+    ports:
+      - 8085:443/tcp
+      - 8086:80/tcp
+    environment:
+      - VIRTUAL_HOST=wiki.${DOMAIN}
+      - LETSENCRYPT_HOST=wiki.${DOMAIN}
+    networks:
+      - "net"
 
   ## When DB is first initialized, it creates MYSQL_USER nextcloud AND any users initialized in ./db-init/01.sql
   # db:

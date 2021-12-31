@@ -6,7 +6,9 @@ import_env(){
 
   if [ -f $FILE ]; then
     echo "Loading variables from $FILE"
-    export $(cat .env | xargs)
+    set -o allexport
+    source $FILE
+    set +o allexport
   else
     echo "Please setup a .env file according to the README.md"
     exit 1
