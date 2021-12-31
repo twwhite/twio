@@ -97,22 +97,22 @@ services:
       - LETSENCRYPT_HOST=apps.${DOMAIN}
 
   ## (Operations = Working; Backups = WIP)
-  kanboard:
-    image: kanboard/kanboard:latest
-    container_name: kanboard
-    depends_on:
-      - "acme-companion"
-      - "db"
-    environment:
-      - VIRTUAL_HOST=tasks.${DOMAIN}
-      - LETSENCRYPT_HOST=tasks.${DOMAIN}
-    networks:
-      - "net"
-    ports:
-      - "8083:80"
-      - "8084:443"
-    volumes:
-      - ${ROOT_DIR}/apps/kanboard/config/config.php:/var/www/app/config.php
+  # kanboard:
+  #   image: kanboard/kanboard:latest
+  #   container_name: kanboard
+  #   depends_on:
+  #     - "acme-companion"
+  #     - "db"
+  #   environment:
+  #     - VIRTUAL_HOST=tasks.${DOMAIN}
+  #     - LETSENCRYPT_HOST=tasks.${DOMAIN}
+  #   networks:
+  #     - "net"
+  #   ports:
+  #     - "8083:80"
+  #     - "8084:443"
+  #   volumes:
+  #     - ${ROOT_DIR}/apps/kanboard/config/config.php:/var/www/app/config.php
 
   #(working)
   # dokuwiki:

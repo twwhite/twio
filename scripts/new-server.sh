@@ -45,7 +45,7 @@ get_init_pico(){
     read -e -p "Files exist in ${ROOT_DIR}/apps/picocms/html. Remove? (y/N)?  " x
     if [ $"$x" == "y" ]; then sudo rm -rf ${ROOT_DIR}/apps/picocms/html/*; fi
   fi
-  git clone --depth 1 ${PICO_COMPOSER_REPOSITORY:-https://github.com/picocms/pico-composer} ./tmp/pico-composer
+  git clone --depth 1 ${PICO_COMPOSER_REPOSITORY} ./tmp/pico-composer
   cp -r ./tmp/pico-composer/* ${ROOT_DIR}/apps/picocms/html/
   cd ./tmp
   curl -sS https://getcomposer.org/installer | php
@@ -62,10 +62,12 @@ setup_secrets(){
   keys=("DB_ROOT_PASS" "DB_NEXTCLOUD_PASS" "DB_KANBOARD_PASS" "BORG_PASS")
   numKeys=${#keys[@]}
   i=1
+  read -e -p "Generate 20-digit hex oepnssl rand passwords (to be stored in .env file)? (Y/n)" z
+  if [ $"$x" == "z" ]; then randPass=1; fi
   for str in "${keys[@]}"; do
     if grep -Gq "$str*" "$FILE"
     then
-      read -e -p "$str exists, overwrite (y/N)?  " c
+      read -e -p "$str exists, overwrite (y/N)? PLEASE RECORD THESE PASSWORDS IN CASE YOU NEED TO RECOVER FROM A BACKUP" c
       if ! [ $"$c" == "y" ]
       then
         continue
@@ -76,9 +78,16 @@ setup_secrets(){
     fi
     while :
     do
-      read -s -p $"($i/$numKeys) Please enter a password for $str: " a
-      read -r -e -s -p $'\nConfirm password: ' b
-      if [ "$a" == "$b" ]; then break; else echo $'\nPasswords did not match'; fi
+      if randPass==1
+      then
+        echo "Generating random password"
+        a=$(openssl rand -hex 20)
+        break
+      else
+        read -s -p $"($i/$numKeys) Please enter a password for $str: " a
+        read -r -e -s -p $'\nConfirm password: ' b
+        if [ "$a" == "$b" ]; then break; else echo $'\nPasswords did not match'; fi
+      fi
     done
     secretsArray[$str]=$a
     echo "$str=$a">>.env
