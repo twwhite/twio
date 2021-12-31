@@ -2,7 +2,7 @@
 Description=TWIO Startup.sh Reboot Script
 
 [Service]
-ExecStart=/twio/scripts/init/startup.sh
+ExecStart=/twio/scripts/startup.sh
 Type=oneshot
 RemainAfterExit=yes
 

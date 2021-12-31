@@ -34,6 +34,8 @@ get_init_pico(){
 
 setup_secrets(){
   echo
+  echo "== USER PASSWORD GENERATION =="
+  echo "Caution: The following passwords will be automatically copied into the .env file in the directory of this script. Precautions should be taken to not allow undesired access to the file accordingly."
   declare -A secretsArray
   keys=("DB_ROOT_PASS" "DB_NEXTCLOUD_PASS" "DB_KANBOARD_PASS" "BORG_PASS")
   numKeys=${#keys[@]}
@@ -62,6 +64,7 @@ setup_secrets(){
     echo
   done
   import_env
+
 }
 
 kanboard_db_init(){
@@ -127,13 +130,13 @@ init_backups(){
 }
 
 import_env
-# init_config_files
-# get_init_pico
+init_config_files
+get_init_pico
 setup_secrets
-# kanboard_db_init
-# setup_docker_networks
-# setup_systemd_services
-# launch
-# waitUntilServiceIsReady dbIsReady "MariaDB"
-# cleanup
-# init_backups
+kanboard_db_init
+setup_docker_networks
+setup_systemd_services
+launch
+waitUntilServiceIsReady dbIsReady "MariaDB"
+cleanup
+init_backups
