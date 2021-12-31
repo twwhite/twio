@@ -42,7 +42,13 @@ setup_secrets(){
     if grep -Gq "$str*" "$FILE"
     then
       read -e -p "$str exists, overwrite (y/N)?  " c
-      if ! [ $"$c" == "y" ]; then continue; fi
+      if ! [ $"$c" == "y" ]
+      then
+        continue
+      else
+        sed -i "s/$str.*//g" "$FILE"
+        sed -ir '/^\s*$/d' "$FILE"
+      fi
     fi
     while :
     do
@@ -124,7 +130,6 @@ import_env
 # init_config_files
 # get_init_pico
 setup_secrets
-echo $DB_NEXTCLOUD_PASS
 # kanboard_db_init
 # setup_docker_networks
 # setup_systemd_services

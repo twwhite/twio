@@ -143,9 +143,9 @@ services:
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MARIADB_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
       - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_NEXTCLOUDPASS}
+      - MYSQL_PASSWORD=${DB_NEXTCLOUD_PASS}
     volumes:
       - ./db-init:/docker-entrypoint-initdb.d
       - ${ROOT_DIR}/db:/var/lib/mysql
@@ -164,7 +164,7 @@ services:
       - MYSQL_HOST=db
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_NEXTCLOUDPASS}
+      - MYSQL_PASSWORD=${DB_NEXTCLOUD_PASS}
     networks:
       - cloud-internal
 
