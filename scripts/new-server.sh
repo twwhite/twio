@@ -11,6 +11,9 @@ import_env(){
     echo "Please setup a .env file according to the README.md"
     exit 1
   fi
+
+  echo $PICO_DATA_DIR
+
 }
 
 init_config_files(){
@@ -22,13 +25,19 @@ init_config_files(){
   # Setup db-init file for docker-compose (from template; see sed password replacements below)
   sudo rm -f ./db-init/01.sql
   sudo cp ./db-init/01.sql.bak ./db-init/01.sql
+
+  # Setup homer dashbaord config file.
+  sudo rm -r ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf 2> /dev/null
+  sudo cp -i ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf.example ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf
+  sudo sed -i "s/SERVERNAMEPLACEHOLDER/${DOMAIN}/" ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf
+
 }
 
 get_init_pico(){
   # Get and init PicoCMS
   curl -sSL https://getcomposer.org/installer | php
-  rm -rf ${ROOT_DIR}/apps/picocms/html
-  git clone --depth 1 $PICO_COMPOSER_REPOSITORY ${ROOT_DIR}/apps/picocms/html
+  rm -rf ${ROOT_DIR}/apps/picocms/html/*
+  git clone --depth 1 ${PICO_COMPOSER_REPOSITORY:-https://github.com/picocms/pico-composer} ./tmp/pico-composer
   php composer.phar --working-dir=${ROOT_DIR}/apps/picocms/html/ install
 }
 
@@ -84,11 +93,12 @@ setup_docker_networks(){
 
 setup_systemd_services(){
   # Setup Systemd service for persistent reboots
+  echo "Copying twio.service"
   sudo cp ./systemd/twio.service /etc/systemd/system/
+  echo "Reloading daemon"
   sudo systemctl daemon-reload
+  echo "Enabling twio.service"
   sudo systemctl enable twio.service
-  # Start up TWIO services
-  sudo systemctl start twio.service
 }
 
 dbIsReady() {
@@ -108,7 +118,7 @@ waitUntilServiceIsReady() {
     sleep 5
   done
 
-  if [ $attempt -gt $MAX_TRIES ]; then
+  if [ $attempt -gt 10 ]; then
     echo "Error: $2 not responding, cancelling set up"
     exit 1
   fi
@@ -120,7 +130,9 @@ cleanup(){
 }
 
 launch() {
-  ./startup.sh
+  # Start up TWIO services
+  echo "Launching! (This step may take a while, please wait)"
+  sudo systemctl start twio.service
 }
 
 init_backups(){

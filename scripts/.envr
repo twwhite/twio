@@ -4,7 +4,7 @@ DEFAULT_SSL_EMAIL=tim@timwhite.io
 PICO_COMPOSER_REPOSITORY=https://github.com/picocms/pico-composer
 PICO_DATA_DIR=/twio/tim/files/Apps/pico
 LOCAL_DATA_FOLDER=/twio/tim
+DB_NEXTCLOUD_PASS=db_nextcloud_pass
+DB_KANBOARD_PASS=db_kanboard_pass
+BORG_PASS=borg_pass
 
-DB_ROOT_PASS=test
-DB_NEXTCLOUD_PASS=test
-DB_KANBOARD_PASS=test
