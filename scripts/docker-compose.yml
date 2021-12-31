@@ -46,10 +46,10 @@ services:
     volumes:
       - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
       - ${ROOT_DIR}/apps/standardnotes/html:/usr/share/nginx/standardnotes/html
-      - ${PICO_DATA_DIR:-$ROOT_DIR/apps/picocms/html}/content:/usr/share/nginx/picocms/html/content
-      - ${PICO_DATA_DIR:-$ROOT_DIR/apps/picocms/html}/assets:/usr/share/nginx/picocms/html/assets
-      - ${PICO_DATA_DIR:-$ROOT_DIR/apps/picocms/html}/themes:/usr/share/nginx/picocms/html/themes
-      - ${PICO_DATA_DIR:-$ROOT_DIR/apps/picocms/html}/config:/usr/share/nginx/picocms/html/config
+      - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
+      - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
+      - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
+      - ${PICO_DATA_DIR}/config:/usr/share/nginx/picocms/html/config
 
   pico-cms:
     image: nginx
@@ -57,10 +57,10 @@ services:
     volumes:
       - ${ROOT_DIR}/apps/picocms/conf.d:/etc/nginx/conf.d
       - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
-      - ${PICO_DATA_DIR:-$ROOT_DIR/apps/picocms/html}/content:/usr/share/nginx/picocms/html/content
-      - ${PICO_DATA_DIR:-$ROOT_DIR/apps/picocms/html}/assets:/usr/share/nginx/picocms/html/assets
-      - ${PICO_DATA_DIR:-$ROOT_DIR/apps/picocms/html}/themes:/usr/share/nginx/picocms/html/themes
-      - ${PICO_DATA_DIR:-$ROOT_DIR/apps/picocms/html}/config:/usr/share/nginx/picocms/html/config
+      - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
+      - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
+      - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
+      - ${PICO_DATA_DIR}/config:/usr/share/nginx/picocms/html/config
     networks:
       - php-internal
       - net
@@ -87,7 +87,7 @@ services:
     image: b4bz/homer
     container_name: apps.${DOMAIN}
     volumes:
-      - ${HOMER_DATA_DIR:-${ROOT_DIR}/apps/homer-dashboard/public/assets}:/www/assets
+      - ${HOMER_DATA_DIR}:/www/assets:ro
     ports:
       - 8080:8080
     networks:
@@ -102,6 +102,7 @@ services:
     container_name: kanboard
     depends_on:
       - "acme-companion"
+      - "db"
     environment:
       - VIRTUAL_HOST=tasks.${DOMAIN}
       - LETSENCRYPT_HOST=tasks.${DOMAIN}
@@ -120,8 +121,8 @@ services:
   #   restart: unless-stopped
   #   volumes:
   #     - ${ROOT_DIR}/apps/dokuwiki/config:/config
-  #     - ${DOKUWIKI_CONF_DIR:-${ROOT_DIR}/apps/dokuwiki/config/dokuwiki/conf}:/config/dokuwiki/conf
-  #     - ${DOKUWIKI_DATA_DIR:-${ROOT_DIR}/apps/dokuwiki/config/dokuwiki/data}:/config/dokuwiki/data
+  #     - ${DOKUWIKI_CONF_DIR:-$ROOT_DIR/apps/dokuwiki/conf/}:/config/dokuwiki/conf
+  #     - ${DOKUWIKI_DATA_DIR:-$ROOT_DIR/apps/dokuwiki/data/}:/config/dokuwiki/data
   #   ports:
   #     - 8085:443/tcp
   #     - 8086:80/tcp
@@ -131,6 +132,7 @@ services:
   #   networks:
   #     - "net"
 
+  ## When DB is first initialized, it creates MYSQL_USER nextcloud AND any users initialized in ./db-init/01.sql
   # db:
   #   image: mariadb
   #   container_name: db
