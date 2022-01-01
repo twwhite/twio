@@ -121,7 +121,7 @@ services:
     restart: unless-stopped
     volumes:
       # - ${ROOT_DIR}/apps/dokuwiki/config:/config
-      - ${DOKUWIKI_CONFIG_DIR}:/config/dokuwiki/config
+      - ${DOKUWIKI_CONFIG_DIR}:/config/dokuwiki/conf
       - ${DOKUWIKI_DATA_DIR}:/config/dokuwiki/data
     ports:
       - 8085:443/tcp
@@ -129,6 +129,8 @@ services:
     environment:
       - VIRTUAL_HOST=wiki.${DOMAIN}
       - LETSENCRYPT_HOST=wiki.${DOMAIN}
+      - PUID=1000
+      - PGID=1000
     networks:
       - "net"
 
