@@ -16,3 +16,7 @@ Mon 03 Jan 2022 06:50:10 PM CET: === TWIO BACKUP SCRIPT STARTED ===
 Mon 03 Jan 2022 06:50:11 PM CET: NEXTCLOUD - Creating /twio/backups/borg-repo::2022-01-03T18:50:11-nextcloud
 Mon 03 Jan 2022 06:50:16 PM CET: PICO - Creating /twio/backups/borg-repo::2022-01-03T18:50:16-pico
 Mon 03 Jan 2022 06:50:18 PM CET: === TWIO BACKUP SCRIPT COMPLETE ===
+Mon 03 Jan 2022 06:51:01 PM CET: === TWIO BACKUP SCRIPT STARTED ===
+Mon 03 Jan 2022 06:51:02 PM CET: NEXTCLOUD - Creating /twio/backups/borg-repo::2022-01-03T18:51:02-nextcloud
+Mon 03 Jan 2022 06:51:04 PM CET: PICO - Creating /twio/backups/borg-repo::2022-01-03T18:51:04-pico
+Mon 03 Jan 2022 06:51:06 PM CET: === TWIO BACKUP SCRIPT COMPLETE ===
