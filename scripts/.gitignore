@@ -4,3 +4,4 @@ composer.phar
 tmp/*
 db-init/01.sql
 ./run-backups.sh
+./logs/*
