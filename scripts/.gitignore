@@ -3,3 +3,4 @@ composer.phar
 *.json
 tmp/*
 db-init/01.sql
+./run-backups.sh

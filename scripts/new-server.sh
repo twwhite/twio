@@ -175,6 +175,6 @@ kanboard_db_init
 setup_docker_networks
 setup_systemd_services
 launch
-# waitUntilServiceIsReady dbIsReady "MariaDB"
+waitUntilServiceIsReady dbIsReady "MariaDB"
 cleanup
 init_backups
