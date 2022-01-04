@@ -44,19 +44,19 @@ services:
     networks:
       - php-internal
     volumes:
-      - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
+      - ${ROOT_DIR}/apps/pico:/usr/share/nginx/picocms
       - ${ROOT_DIR}/apps/standardnotes/html:/usr/share/nginx/standardnotes/html
       - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
       - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
       - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
       - ${PICO_DATA_DIR}/config:/usr/share/nginx/picocms/html/config
 
-  pico-cms:
+  pico:
     image: nginx
     container_name: ${DOMAIN}
     volumes:
-      - ${ROOT_DIR}/apps/picocms/conf.d:/etc/nginx/conf.d
-      - ${ROOT_DIR}/apps/picocms:/usr/share/nginx/picocms
+      - ${ROOT_DIR}/apps/pico/conf.d:/etc/nginx/conf.d
+      - ${ROOT_DIR}/apps/pico:/usr/share/nginx/picocms
       - ${PICO_DATA_DIR}/content:/usr/share/nginx/picocms/html/content
       - ${PICO_DATA_DIR}/assets:/usr/share/nginx/picocms/html/assets
       - ${PICO_DATA_DIR}/themes:/usr/share/nginx/picocms/html/themes
@@ -83,7 +83,7 @@ services:
 #      - LETSENCRYPT_HOST=notes.${DOMAIN}
 
   ## (working)
-  homer-dashboard:
+  homer:
     image: b4bz/homer
     container_name: apps.${DOMAIN}
     volumes:
@@ -151,9 +151,9 @@ services:
       - cloud-internal
       - net
 
-  nextcloudapp:
+  nextcloud:
     image: nextcloud:fpm
-    container_name: nextcloudapp
+    container_name: nextcloud
     restart: always
     volumes:
       - nc:/var/www/html
@@ -182,7 +182,25 @@ services:
       - nc:/var/www/html:ro
       - ${ROOT_DIR}/apps/nextcloud/conf.d/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - nextcloudapp
+      - nextcloud
+
+  freshrss:
+    image: freshrss/freshrss:latest
+    container_name: freshrss
+    restart: always
+    ports:
+      - 8089:80
+    networks:
+      - net
+    depends_on:
+      - db
+    volumes:
+      - ${FRESHRSS_DATA_DIR}:/var/www/FreshRSS/data
+      - ${FRESHRSS_EXTENSIONS_DIR}:/var/www/FreshRSS/extensions
+    environment:
+      - CRON_MIN='*/20'
+      - VIRTUAL_HOST=rss.${DOMAIN}
+      - LETSENCRYPT_HOST=rss.${DOMAIN}
 
   # adminer:
   #   image: adminer

@@ -4,3 +4,7 @@ GRANT ALL ON `nextcloud`.* TO 'nextcloud'@'%';
 CREATE DATABASE IF NOT EXISTS `kanboard`;
 CREATE USER kanboard IDENTIFIED BY 'kanboardpasswordplaceholder';
 GRANT ALL ON `kanboard`.* TO 'kanboard'@'%';
+
+CREATE DATABASE IF NOT EXISTS `freshrss`;
+CREATE USER freshrss IDENTIFIED BY 'freshrsspasswordplaceholder';
+GRANT ALL ON `freshrss`.* TO 'freshrss'@'%';

@@ -27,9 +27,9 @@ init_config_files(){
 
   # Setup homer dashbaord config file.
   echo "Setting up Homer config file."
-  sudo rm -r ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf 2> /dev/null
-  sudo cp -i ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf.example ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf
-  sudo sed -i "s/SERVERNAMEPLACEHOLDER/${DOMAIN}/" ${ROOT_DIR}/apps/homer-dashboard/conf.d/default.conf
+  sudo rm -r ${ROOT_DIR}/apps/homer/conf.d/default.conf 2> /dev/null
+  sudo cp -i ${ROOT_DIR}/apps/homer/conf.d/default.conf.example ${ROOT_DIR}/apps/homer/conf.d/default.conf
+  sudo sed -i "s/SERVERNAMEPLACEHOLDER/${DOMAIN}/" ${ROOT_DIR}/apps/homer/conf.d/default.conf
 
   # Setup db-init file for docker-compose (from template; see sed password replacements below)
   echo "Setting up DB-init file(s)."
@@ -42,16 +42,16 @@ init_config_files(){
 get_init_pico(){
   echo "Initiating PicoCMS"
   # Get and init PicoCMS
-  if [[ $(find ${ROOT_DIR}/apps/picocms/html -name "*.*") ]]
+  if [[ $(find ${ROOT_DIR}/apps/pico/html -name "*.*") ]]
   then
-    read -e -p "Files exist in ${ROOT_DIR}/apps/picocms/html. Remove? (y/N)?  " x
-    if [ $"$x" == "y" ]; then sudo rm -rf ${ROOT_DIR}/apps/picocms/html/*; fi
+    read -e -p "Files exist in ${ROOT_DIR}/apps/pico/html. Remove? (y/N)?  " x
+    if [ $"$x" == "y" ]; then sudo rm -rf ${ROOT_DIR}/apps/pico/html/*; fi
   fi
   git clone --depth 1 ${PICO_COMPOSER_REPOSITORY} ./tmp/pico-composer
-  cp -r ./tmp/pico-composer/* ${ROOT_DIR}/apps/picocms/html/
+  cp -r ./tmp/pico-composer/* ${ROOT_DIR}/apps/pico/html/
   cd ./tmp
   curl -sS https://getcomposer.org/installer | php
-  php composer.phar --working-dir=${ROOT_DIR}/apps/picocms/html/ install
+  php composer.phar --working-dir=${ROOT_DIR}/apps/pico/html/ install
   cd ${ROOT_DIR}/scripts
   rm -rf ${ROOT_DIR}/scripts/tmp/*
 }
@@ -61,7 +61,7 @@ setup_secrets(){
   echo "== USER PASSWORD GENERATION =="
   echo "Caution: The following passwords will be automatically copied into the .env file in the directory of this script. Precautions should be taken to not allow undesired access to the file accordingly."
   declare -A secretsArray
-  keys=("DB_ROOT_PASS" "DB_NEXTCLOUD_PASS" "DB_KANBOARD_PASS" "BORG_PASS")
+  keys=("DB_ROOT_PASS" "DB_NEXTCLOUD_PASS" "DB_KANBOARD_PASS" "DB_FRESHRSS_PASS" "BORG_PASS")
   numKeys=${#keys[@]}
   i=1
   read -e -p "Generate 20-digit hex oepnssl rand passwords (to be stored in .env file)? (Y/n)" z
@@ -105,6 +105,13 @@ kanboard_db_init(){
   echo
   sudo sed -i "s/kanboardpasswordplaceholder/${DB_KANBOARD_PASS}/" ${ROOT_DIR}/apps/kanboard/config/config.php
   echo
+}
+
+freshrss_db_init(){
+  sed -i "s/freshrsspasswordplaceholder/${DB_FRESHRSS_PASS}/" ./db-init/01.sql
+  echo
+  # sudo sed -i "s/kanboardpasswordplaceholder/${DB_KANBOARD_PASS}/" ${ROOT_DIR}/apps/kanboard/config/config.php
+  # echo
 }
 
 setup_docker_networks(){
@@ -172,6 +179,7 @@ init_config_files
 get_init_pico
 setup_secrets
 kanboard_db_init
+freshrss_db_init
 setup_docker_networks
 setup_systemd_services
 launch
