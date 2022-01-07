@@ -13,8 +13,6 @@ import_env(){
     echo "Please setup a .env file according to the README.md"
     exit 1
   fi
-
-  echo "Variables loaded!"
 }
 
 init_config_files(){
@@ -69,7 +67,8 @@ setup_secrets(){
   for str in "${keys[@]}"; do
     if grep -Gq "$str*" "$FILE"
     then
-      read -e -p "$str exists, overwrite (y/N)? PLEASE RECORD THESE PASSWORDS IN CASE YOU NEED TO RECOVER FROM A BACKUP" c
+      echo "PLEASE RECORD YOUR PASSWORDS IN CASE YOU NEED TO RECOVER FROM A BACKUP"
+      read -e -p "$str exists, overwrite (y/N)? "  c
       if ! [ $"$c" == "y" ]
       then
         continue
@@ -169,9 +168,8 @@ launch() {
 }
 
 init_backups(){
-  :
   # echo 'Starting init-backup script...'
-  # sudo bash ./init-backups.sh
+  sudo bash ./init-backups.sh
 }
 
 import_env

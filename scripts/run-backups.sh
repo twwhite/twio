@@ -5,7 +5,7 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
 fi
 
 # Do no change this value, it is auto-populated by the init_backups script.
-ROOT_DIR=ROOTDIRPLACEHOLDER
+ROOT_DIR=/twio
 
 # TODO - convert to twio ecosystem
 FILE=${ROOT_DIR}/scripts/.env
