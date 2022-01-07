@@ -5,7 +5,7 @@ composer.phar
 tmp/*
 db-init/01.sql
 run-backups.sh
-!logs/
 logs/*
-!recovery/
+!logs/
 recovery/*
+!recovery/
