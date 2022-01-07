@@ -156,8 +156,7 @@ waitUntilServiceIsReady() {
 }
 
 cleanup(){
-  read -p 'Remove local plain-text password containing DB-init file (y/n)?  ' ans
-  if ans="y"; then rm ./db-init/01.sql; fi
+  rm ./db-init/01.sql
 }
 
 launch() {

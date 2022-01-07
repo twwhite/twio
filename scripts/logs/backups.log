@@ -148,3 +148,13 @@ Fri 07 Jan 2022 04:20:01 AM CET: nextcloud - Creating /twio/backups/borg-nextclo
 Fri 07 Jan 2022 04:20:02 AM CET: All Backups - Pruning d14 w4 m6 y* 
 Fri 07 Jan 2022 04:20:04 AM CET: Total Backup Size 888K	/twio/backups
 Fri 07 Jan 2022 04:20:04 AM CET: === TWIO BACKUP SCRIPT COMPLETE ===
+Fri 07 Jan 2022 11:25:14 PM CET: === TWIO BACKUP SCRIPT STARTED ===
+Fri 07 Jan 2022 11:25:15 PM CET: nextcloud - Creating /twio/backups/borg-nextcloud::2022-01-07T23:25:15-nextcloud
+Fri 07 Jan 2022 11:25:16 PM CET: All Backups - Pruning d14 w4 m6 y* 
+Fri 07 Jan 2022 11:25:17 PM CET: Total Backup Size 12K	/twio/backups
+Fri 07 Jan 2022 11:25:17 PM CET: === TWIO BACKUP SCRIPT COMPLETE ===
+Fri 07 Jan 2022 11:27:00 PM CET: === TWIO BACKUP SCRIPT STARTED ===
+Fri 07 Jan 2022 11:27:00 PM CET: nextcloud - Creating /twio/backups/borg-nextcloud::2022-01-07T23:27:00-nextcloud
+Fri 07 Jan 2022 11:27:00 PM CET: All Backups - Pruning d14 w4 m6 y* 
+Fri 07 Jan 2022 11:27:02 PM CET: Total Backup Size 12K	/twio/backups
+Fri 07 Jan 2022 11:27:02 PM CET: === TWIO BACKUP SCRIPT COMPLETE ===
