@@ -1,9 +1,4 @@
 #!/bin/bash
-if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "Not running as root"
-    exit
-fi
-
 # Do no change this value, it is auto-populated by the init_backups script.
 ROOT_DIR=ROOTDIRPLACEHOLDER
 
@@ -40,27 +35,15 @@ stage_nextcloud(){
   ## Per Nextcloud docs (https://docs.nextcloud.com/server/latest/admin_manual/maintenance/backup.html)
 
   BACKUP_SERVICE="nextcloud"
-  BACKUP_DIRECTORIES=("${ROOT_DIR}/backups/tmp/")
+  BACKUP_DIRECTORIES=("${ROOT_DIR}/apps/nextcloud/")
 
   # Enable maintenance mode
-  docker exec -ti --user www-data nextcloudapp php occ maintenance:mode --on
-
-  # Remove junk from backups/tmp folder
-  sudo rm -rf ${ROOT_DIR}/backups/tmp && sudo mkdir ${ROOT_DIR}/backups/tmp
-
-  echo "Copying files to local from Nextcloud Docker container"
-  # Grab files from Docker container in temp folder
-  sudo docker cp nextcloudapp:/var/www/html/data ${ROOT_DIR}/backups/tmp
-  sudo docker cp nextcloudapp:/var/www/html/themes ${ROOT_DIR}/backups/tmp
-  sudo docker cp nextcloudapp:/var/www/html/config ${ROOT_DIR}/backups/tmp
+  docker exec -ti --user www-data nextcloud php occ maintenance:mode --on
 
   borg_create
 
-  echo "Removing local copies of data"
-  sudo rm -rf ${ROOT_DIR}/backups/tmp && sudo mkdir ${ROOT_DIR}/backups/tmp
-
   # Enable maintenance mode
-  docker exec -ti --user www-data nextcloudapp php occ maintenance:mode --off
+  docker exec -ti --user www-data nextcloud php occ maintenance:mode --off
 }
 
 stage_dokuwiki(){
