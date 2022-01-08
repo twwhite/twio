@@ -49,6 +49,101 @@ init_borg_repo(){
   done
 }
 
+
+rclone_config(){
+
+  rcloneFinalDestination=""
+  echo
+  echo "====== RCLONE CONFIG ======"
+  echo
+  rclone config
+  echo
+  select_rclone_remote
+}
+
+select_rclone_remote(){
+  echo
+  echo "====== SELECT RCLONE REMOTE & DESTINATION FOR USE WITH TWIO BACKUPS ======"
+  echo
+  ## Setup & Get Rclone remote
+  z=1
+  remotes=( $(rclone listremotes) )
+  for x in "${remotes[@]}"
+  do
+    echo "[$z] $x"
+    z=$(($z+1))
+  done
+  echo "[$z] Return to Rclone config"
+  z=$(($z+1))
+  echo "[$z] Skip Rclone remote backup deployment and continue"
+  echo
+  while :
+  do
+    read -e -p "Select remote from above: " s
+    if [[ $s -gt 0 && $s -lt ${#remotes[@]}+3 ]]; then :; else echo "Invalid selection. Please try again." && continue; fi
+    if [[ $s -eq $z-1 ]]; then break&&rclone_config; fi
+    if [[ $s -eq $z ]]; then echo "Skipped Rclone Setup"&&break; fi
+    echo
+    echo "Rclone remote selected: " ${remotes[$s-1]}
+    echo "Loading directories..."
+    rcloneRemoteSelection=${remotes[$s-1]}
+    break
+  done
+  select_rclone_destination
+}
+
+select_rclone_destination(){
+
+  z=1
+  buckets=( $(rclone lsf $rcloneRemoteSelection --dirs-only ))
+  for x in "${buckets[@]}"
+  do
+    echo "[$z] $x"
+    z=$(($z+1))
+  done
+  if [[ $z -eq 1 ]]; then clear&&echo "error connecting to remote; check config."&&select_rclone_remote; fi
+  echo "[$z] Return to Rclone config"
+  z=$(($z+1))
+  echo "[$z] Skip Rclone remote backup deployment and continue"
+  echo
+  while :
+  do
+    read -e -p "Select destination directory from above: " b
+    if [[ $b -gt 0 && $b -lt ${#buckets[@]}+3 ]]; then :; else echo "Invalid selection. Please try again." && continue; fi
+    if [[ $b -eq $z-1 ]]; then rclone_config; fi
+    if [[ "$b" == "$z" ]]; then echo "Skipped Rclone Setup"&&break; fi
+    echo
+    # echo "Destination directory selected: " ${buckets[$b-1]}
+    rcloneDestinationSelection=${buckets[$b-1]}
+    rcloneFinalDestination=$rcloneRemoteSelection$rcloneDestinationSelection
+    echo "Rclone backup destination confirmed: "$rcloneFinalDestination
+    if grep -Gq "RCLONE_REMOTE_NAME" "$FILE"
+    then
+      read -e -p "RCLONE destination exists in .env file, overwrite (y/n)? "  c
+      if ! [ $"$c" == "y" ]
+      then
+        continue
+      else
+        sed -i "s/RCLONE_REMOTE_NAME.*//g" "$FILE"
+        sed -ir '/^\s*$/d' "$FILE"
+      fi
+      echo "RCLONE_REMOTE_NAME=$rcloneFinalDestination">>.env
+    fi
+    break
+  done
+}
+
+setup_rclone_remote(){
+  clear
+  read -e -p "Setup Rclone remote backup deployment (Y/n)? " x
+  if [ $"$x" == "y" ]
+  then
+    rclone_config
+  else
+    noRemote=1
+  fi
+}
+
 create_backup_service(){
   crontab -l > mycron
   # Run twice daily - 01 AM and 01 PM
@@ -64,5 +159,6 @@ create_backup_service(){
 script_set_root_dir
 get_available_space
 install_borg
-init_borg_repo
-# create_backup_service
+init_borg_repos
+setup_rclone_remote
+create_backup_service
