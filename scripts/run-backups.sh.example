@@ -1,6 +1,6 @@
 #!/bin/bash
 # Do no change this value, it is auto-populated by the init_backups script.
-ROOT_DIR=/ROOTDIRPLACEHOLDER
+ROOT_DIR=ROOTDIRPLACEHOLDER
 
 # TODO - convert to twio ecosystem
 FILE=${ROOT_DIR}/scripts/.env
@@ -29,7 +29,7 @@ cloud_deploy(){
 borg_create(){
   echo
   echo "STAGING ${BACKUP_SERVICE} BACKUP"
-  archive_name="$(date -Iseconds | cut -d '+' -f 1)-${BACKUP_SERVICE}"
+  archive_name="${BACKUP_SERVICE}-$(date +'%Y-%m-%d-%H%M')"
   borg_options="--stats --compression zlib"
   echo $(date)": ${BACKUP_SERVICE} - Creating ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name}" >> ${ROOT_DIR}/scripts/logs/backups.log
   BORG_PASSPHRASE=${BORG_PASS} borg create ${borg_options} ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name} "${BACKUP_DIRECTORIES[*]}"

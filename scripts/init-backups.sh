@@ -146,13 +146,12 @@ setup_rclone_remote(){
 
 create_backup_service(){
   crontab -l > mycron
-  # Run twice daily - 01 AM and 01 PM
-  # echo "00 01,13 * * * /twio/scripts/run-backups.sh" >> mycron
 
-  # TODO: Fix cron time
-  echo "*/1 * * * * /twio/scripts/run-backups.sh >/dev/null 2>&1" >> mycron
+  # Backup every hour
 
-  sudo crontab mycron
+  echo "0 * * * /twio/scripts/run-backups.sh >/dev/null 2>&1" >> mycron
+
+  crontab mycron
   rm mycron
 }
 
@@ -162,3 +161,4 @@ install_borg
 init_borg_repo
 setup_rclone_remote
 create_backup_service
+echo "Backup initializing complete."
