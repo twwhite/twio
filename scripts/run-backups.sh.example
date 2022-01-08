@@ -26,6 +26,12 @@ cloud_deploy(){
   fi
 }
 
+clear_vars(){
+  unset BACKUP_SERVICE
+  unset BACKUP_DIRECTORIES
+  unset BACKUP_DATABASE
+}
+
 borg_create(){
   echo
   echo "STAGING ${BACKUP_SERVICE} BACKUP"
@@ -33,6 +39,7 @@ borg_create(){
   borg_options="--stats --compression zlib"
   echo $(date)": ${BACKUP_SERVICE} - Creating ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name}" >> ${ROOT_DIR}/scripts/logs/backups.log
   BORG_PASSPHRASE=${BORG_PASS} borg create ${borg_options} ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name} "${BACKUP_DIRECTORIES[*]}"
+  clear_vars
 }
 
 stage_nextcloud(){
@@ -40,15 +47,19 @@ stage_nextcloud(){
   ## Per Nextcloud docs (https://docs.nextcloud.com/server/latest/admin_manual/maintenance/backup.html)
 
   BACKUP_SERVICE="nextcloud"
-  BACKUP_DIRECTORIES=("${ROOT_DIR}/apps/nextcloud/")
+  BACKUP_DIRECTORIES=("${ROOT_DIR}/apps/${BACKUP_SERVICE}/")
+  BACKUP_DATABASE="${BACKUP_SERVICE}"
 
   # Enable maintenance mode
   docker exec -ti --user www-data nextcloud php occ maintenance:mode --on
+
+
 
   borg_create
 
   # Enable maintenance mode
   docker exec -ti --user www-data nextcloud php occ maintenance:mode --off
+
 }
 
 stage_dokuwiki(){
@@ -88,7 +99,7 @@ prune_borg(){
 
 echo $(date)": === TWIO BACKUP SCRIPT STARTED ===" >> ${ROOT_DIR}/scripts/logs/backups.log
 stage_nextcloud
-stage_pico
+# stage_pico
 # prune_borg
-cloud_deploy
+# cloud_deploy
 echo $(date)": === TWIO BACKUP SCRIPT COMPLETE ===" >> ${ROOT_DIR}/scripts/logs/backups.log

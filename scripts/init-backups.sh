@@ -145,14 +145,21 @@ setup_rclone_remote(){
 }
 
 create_backup_service(){
-  crontab -l > mycron
 
-  # Backup every hour
+  currentCrontab=$(crontab -l)
+  cronTiming="0 0 * * *"
+  cronScript="/twio/scripts/run-backups.sh"
+  if [[ $currentCrontab == *"$cronScript"* ]]
+  then
+    echo "Crontab exists; adjust manually using crontab -e"
+  else
+    echo "Setting up run-bakups crontab"
+    crontab -l > mycron
+    echo "$cronTiming $cronScript >/dev/null 2>&1"  >> mycron
+    crontab mycron
+    rm mycron
+  fi
 
-  echo "0 * * * /twio/scripts/run-backups.sh >/dev/null 2>&1" >> mycron
-
-  crontab mycron
-  rm mycron
 }
 
 script_set_root_dir
@@ -161,4 +168,4 @@ install_borg
 init_borg_repo
 setup_rclone_remote
 create_backup_service
-echo "Backup initializing complete."
+echo "Backup init complete."

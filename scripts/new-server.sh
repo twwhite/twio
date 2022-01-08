@@ -20,19 +20,19 @@ init_config_files(){
   # Setup kanboard config file. Note: Plaintext pw stored; be careful not to sync this file, only sync the example.
   # TO-DO -> Switch from linked local directory to copying config file into Docker container at init.
   echo "Setting up Kanboard config file."
-  sudo rm -f ${ROOT_DIR}/apps/kanboard/config/config.php
-  sudo cp -i ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
+  rm -f ${ROOT_DIR}/apps/kanboard/config/config.php
+  cp -i ${ROOT_DIR}/apps/kanboard/config/config.php.example ${ROOT_DIR}/apps/kanboard/config/config.php
 
   # Setup homer dashbaord config file.
   echo "Setting up Homer config file."
-  sudo rm -r ${ROOT_DIR}/apps/homer/conf.d/default.conf 2> /dev/null
-  sudo cp -i ${ROOT_DIR}/apps/homer/conf.d/default.conf.example ${ROOT_DIR}/apps/homer/conf.d/default.conf
-  sudo sed -i "s/SERVERNAMEPLACEHOLDER/${DOMAIN}/" ${ROOT_DIR}/apps/homer/conf.d/default.conf
+  rm -r ${ROOT_DIR}/apps/homer/conf.d/default.conf 2> /dev/null
+  cp -ip ${ROOT_DIR}/apps/homer/conf.d/default.conf.example ${ROOT_DIR}/apps/homer/conf.d/default.conf
+  sed -i "s/SERVERNAMEPLACEHOLDER/${DOMAIN}/" ${ROOT_DIR}/apps/homer/conf.d/default.conf
 
   # Setup db-init file for docker-compose (from template; see sed password replacements below)
   echo "Setting up DB-init file(s)."
-  sudo rm -f ./db-init/01.sql
-  sudo cp ./db-init/01.sql.bak ./db-init/01.sql
+  rm -f ./db-init/01.sql
+  cp ./db-init/01.sql.bak ./db-init/01.sql
 
   echo "Config files init complete."
 }
@@ -43,7 +43,7 @@ get_init_pico(){
   if [[ $(find ${ROOT_DIR}/apps/pico/html -name "*.*") ]]
   then
     read -e -p "Files exist in ${ROOT_DIR}/apps/pico/html. Remove? (y/N)?  " x
-    if [ $"$x" == "y" ]; then sudo rm -rf ${ROOT_DIR}/apps/pico/html/*; fi
+    if [ $"$x" == "y" ]; then rm -rf ${ROOT_DIR}/apps/pico/html/*; fi
   fi
   git clone --depth 1 ${PICO_COMPOSER_REPOSITORY} ./tmp/pico-composer
   cp -r ./tmp/pico-composer/* ${ROOT_DIR}/apps/pico/html/
@@ -102,7 +102,7 @@ setup_secrets(){
 kanboard_db_init(){
   sed -i "s/kanboardpasswordplaceholder/${DB_KANBOARD_PASS}/" ./db-init/01.sql
   echo
-  sudo sed -i "s/kanboardpasswordplaceholder/${DB_KANBOARD_PASS}/" ${ROOT_DIR}/apps/kanboard/config/config.php
+  sed -i "s/kanboardpasswordplaceholder/${DB_KANBOARD_PASS}/" ${ROOT_DIR}/apps/kanboard/config/config.php
   echo
 }
 
@@ -168,7 +168,7 @@ launch() {
 
 init_backups(){
   # echo 'Starting init-backup script...'
-  sudo bash ./init-backups.sh
+  bash ./init-backups.sh
 }
 
 import_env

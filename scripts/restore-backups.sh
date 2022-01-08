@@ -1,118 +1,105 @@
 #!/bin/bash
-import_env(){
-  # Import .env vars -> Carries over to docker-compose.yml
-  FILE=./.env
+# Do no change this value, it is auto-populated by the init_backups script.
+ROOT_DIR=/twio
 
-  if [ -f $FILE ]; then
-    echo "Loading variables from $FILE"
-    set -o allexport
-    source $FILE
-    set +o allexport
-  else
-    echo "Error: Please setup a .env file according to the README.md"
-    exit 1
-  fi
-}
+# TODO - convert to twio ecosystem
+FILE=${ROOT_DIR}/scripts/.env
 
-get_running_docker_compose_services(){
-  running_services=$(docker-compose ps --services)
-  arr_running_services=($(echo $running_services | tr " " "\n"))
-}
+if [ -f $FILE ]; then
+  echo "Loading variables from $FILE"
+  set -o allexport
+  source $FILE
+  set +o allexport
+else
+  echo "Please setup a .env file according to the README.md"
+  exit 1
+fi
 
-select_files(){
-  find ./ -printf "%f\n"
-}
-
-main_menu(){
-
-  echo
-  echo "Note: Recovery files must be placed in a subdirectory within the $PWD/recovery directory corresponding to the service name"
-  echo "Example: recovery/pico/{RECOVERY_FILES}*"
-  echo
-  echo "Active Services:"
-
-  x=1
-  for i in ${arr_running_services[@]}; do echo "[$x] $i" && x=$(($x+1)); done
-
-  echo
-  while :
-  do
-    read -ep "Please select a service from above to begin recovery: " selection
-    if [[ $selection -gt 0 && $selection -lt ${#arr_running_services[@]}+1 ]]; then break; else echo "Invalid selection. Please try again."; fi
-  done
-  cmd=("restore_"${arr_running_services[$selection-1]})
-
-
-  echo "Entering recovery for "${arr_running_services[$selection-1]}
-  clear
-  "${cmd[@]}" || error_not_implemented
-}
-
-
-error_not_implemented(){
-  echo
-  clear
-  echo "============================================================================="
-  echo "=== Error: Recovery function not implemented for this service yet. Sorry! ==="
-  echo "============================================================================="
-  main_menu
-}
-
-check_for_backups_in_dir(){
-  if [ -z "$(ls -A ./recovery)" ]
+cloud_deploy(){
+  if [ -z ${RCLONE_REMOTE_NAME+x} ]
   then
-    echo "Error: Please move files/directories for recovery to $PWD/recovery"
-    echo "Exiting recovery."
-    exit 1
+    echo "No variable set for cloud deploy"
   else
-    :
+    echo "Rclone syncing to remote..."
+    rclone sync ${ROOT_DIR}/backups ${RCLONE_REMOTE_NAME}
+    if [[ $?==0 ]]; then echo "Cloud deployment successful"&&echo $(date)": Cloud deployment successful. Destination - ${RCLONE_REMOTE_NAME}" >> ${ROOT_DIR}/scripts/logs/backups.log; fi
   fi
 }
 
-restore_pico(){
-  :
+clear_vars(){
+  unset BACKUP_SERVICE
+  unset BACKUP_DIRECTORIES
+  unset BACKUP_DATABASE
 }
 
-restore_homer(){
-  :
-}
-
-#
-# restore_kanboard(){
-#   :
-# }
-
-restore_dokuwiki(){
-  :
-}
-
-restore_nextcloud(){
-
-  echo "Nextcloud Recovery Mode"
-  echo "========================"
+borg_create(){
   echo
-  echo "Step 1/2: Database recovery"
-
-
-  echo "Step 2/2: File recovery"
-
-  # Enable maintenance mode
-  docker exec -ti --user www-data nextcloudapp php occ maintenance:mode --on
-
-  docker exec --user www-data -ti nextcloud php occ files:scan --all
-
-  # Enable maintenance mode
-  docker exec -ti --user www-data nextcloudapp php occ maintenance:mode --off
+  echo "STAGING ${BACKUP_SERVICE} BACKUP"
+  archive_name="${BACKUP_SERVICE}-$(date +'%Y-%m-%d-%H%M')"
+  borg_options="--stats --compression zlib"
+  echo $(date)": ${BACKUP_SERVICE} - Creating ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name}" >> ${ROOT_DIR}/scripts/logs/backups.log
+  BORG_PASSPHRASE=${BORG_PASS} borg create ${borg_options} ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name} "${BACKUP_DIRECTORIES[*]}"
+  clear_vars
 }
 
-restore_freshrss(){
+stage_nextcloud(){
+
+  ## Per Nextcloud docs (https://docs.nextcloud.com/server/latest/admin_manual/maintenance/backup.html)
+
+  BACKUP_SERVICE="nextcloud"
+  BACKUP_DIRECTORIES=("${ROOT_DIR}/apps/${BACKUP_SERVICE}/")
+  BACKUP_DATABASE="${BACKUP_SERVICE}"
+
+  # Enable maintenance mode
+  docker exec -ti --user www-data nextcloud php occ maintenance:mode --on
+
+
+
+  borg_create
+
+  # Enable maintenance mode
+  docker exec -ti --user www-data nextcloud php occ maintenance:mode --off
+
+}
+
+stage_dokuwiki(){
+  BACKUP_SERVICE="dokuwiki"
+  BACKUP_DIRECTORIES=("${DOKUWIKI_DATA_DIR}")
+  borg_create
+}
+
+
+stage_kanboard(){
   :
 }
 
-clear
-get_running_docker_compose_services
-import_env
-main_menu
-# check_for_backups_in_dir
+stage_pico(){
+  BACKUP_SERVICE="pico"
+  BACKUP_DIRECTORIES=("${PICO_DATA_DIR}")
+  borg_create
+}
 
-# restore_nextcloud
+prune_borg(){
+  echo $(date)": All Backups - Pruning d14 w4 m6 y* " >> ${ROOT_DIR}/scripts/logs/backups.log
+  repos=("nextcloud" "pico")
+  for repo in "${repos[@]}"
+  do
+    BORG_PASSPHRASE=${BORG_PASS} borg prune \
+     --stats \
+     --keep-minutely 5 \
+     --keep-daily 7 \
+     --keep-weekly 2 \
+     --keep-monthly 3 \
+     --keep-yearly -1 \
+     ${ROOT_DIR}/backups/borg-$repo
+  done
+  allBackupsSize=$(du -hs ${ROOT_DIR}/backups)
+  echo $(date)": Total Backup Size $allBackupsSize" >> ${ROOT_DIR}/scripts/logs/backups.log
+}
+
+echo $(date)": === TWIO BACKUP SCRIPT STARTED ===" >> ${ROOT_DIR}/scripts/logs/backups.log
+stage_nextcloud
+# stage_pico
+# prune_borg
+# cloud_deploy
+echo $(date)": === TWIO BACKUP SCRIPT COMPLETE ===" >> ${ROOT_DIR}/scripts/logs/backups.log
