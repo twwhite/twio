@@ -20,7 +20,7 @@ script_set_root_dir(){
   if grep -Gq "ROOTDIRPLACEHOLDER" "${ROOT_DIR}/scripts/run-backups.sh"
   then
     echo "Setting absolute root_dir reference in Run Backups script in order for cron to load .env properly"
-    sudo sed -i "s|ROOTDIRPLACEHOLDER|${ROOT_DIR}|" ${ROOT_DIR}/scripts/run-backups.sh
+    sed -i "s|ROOTDIRPLACEHOLDER|${ROOT_DIR}|" ${ROOT_DIR}/scripts/run-backups.sh
 
   fi
 }
@@ -44,8 +44,8 @@ init_borg_repo(){
   do
     echo "Initializing local Borg repository in "$ROOT_DIR/backups/borg-$repo""
     echo $(date)": Initializing local Borg repository in "$ROOT_DIR/backups/borg-$repo"" >> ${ROOT_DIR}/scripts/logs/backups.log
-    sudo BORG_PASSPHRASE=${BORG_PASS} borg init --encryption=repokey $ROOT_DIR/backups/borg-$repo >/dev/null
-    sudo borg config $ROOT_DIR/backups/borg-$repo additional_free_space $paddingPerRepo
+    BORG_PASSPHRASE=${BORG_PASS} borg init --encryption=repokey $ROOT_DIR/backups/borg-$repo >/dev/null
+    borg config $ROOT_DIR/backups/borg-$repo additional_free_space $paddingPerRepo
   done
 }
 
@@ -134,10 +134,10 @@ select_rclone_destination(){
 }
 
 setup_rclone_remote(){
-  clear
   read -e -p "Setup Rclone remote backup deployment (Y/n)? " x
   if [ $"$x" == "y" ]
   then
+    clear
     rclone_config
   else
     noRemote=1
