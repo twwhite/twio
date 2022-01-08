@@ -159,6 +159,6 @@ create_backup_service(){
 script_set_root_dir
 get_available_space
 install_borg
-init_borg_repos
+init_borg_repo
 setup_rclone_remote
 create_backup_service

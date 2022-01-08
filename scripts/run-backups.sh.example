@@ -32,7 +32,7 @@ borg_create(){
   archive_name="$(date -Iseconds | cut -d '+' -f 1)-${BACKUP_SERVICE}"
   borg_options="--stats --compression zlib"
   echo $(date)": ${BACKUP_SERVICE} - Creating ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name}" >> ${ROOT_DIR}/scripts/logs/backups.log
-  sudo BORG_PASSPHRASE=${BORG_PASS} borg create ${borg_options} ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name} "${BACKUP_DIRECTORIES[*]}"
+  BORG_PASSPHRASE=${BORG_PASS} borg create ${borg_options} ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name} "${BACKUP_DIRECTORIES[*]}"
 }
 
 stage_nextcloud(){
@@ -73,7 +73,7 @@ prune_borg(){
   repos=("nextcloud" "pico")
   for repo in "${repos[@]}"
   do
-    sudo BORG_PASSPHRASE=${BORG_PASS} borg prune \
+    BORG_PASSPHRASE=${BORG_PASS} borg prune \
      --stats \
      --keep-minutely 5 \
      --keep-daily 7 \
