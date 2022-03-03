@@ -60,8 +60,7 @@ init_nextcloud_folders(){
   if [ ! -d ${ROOT_DIR}/apps/nextcloud/data ]; then
     mkdir ${ROOT_DIR}/apps/nextcloud/data
   fi
-  sudo chown -R www-data: ${ROOT_DIR}/apps/nextcloud/
-
+  sudo setfacl -R -m u:${DEFAULT_USER}:rwX ${ROOT_DIR}/apps/nextcloud/data
 }
 
 get_init_pico(){
