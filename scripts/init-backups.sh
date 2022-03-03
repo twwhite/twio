@@ -145,7 +145,6 @@ setup_rclone_remote(){
 }
 
 create_backup_service(){
-
   currentCrontab=$(crontab -l)
   cronTiming="0 0 * * *"
   cronScript="/twio/scripts/run-backups.sh"
@@ -153,10 +152,10 @@ create_backup_service(){
   then
     echo "Crontab exists; adjust manually using crontab -e"
   else
-    echo "Setting up run-bakups crontab"
+    echo "Setting up run-backups crontab"
     crontab -l > mycron
     echo "$cronTiming $cronScript >/dev/null 2>&1"  >> mycron
-    crontab mycron
+    sudo crontab mycron
     rm mycron
   fi
 

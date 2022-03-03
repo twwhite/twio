@@ -13,6 +13,8 @@ import_env(){
     echo "Please setup a .env file according to the README.md"
     exit 1
   fi
+  echo "Setting permissions for $FILE to be accessed only by $USER"
+  sudo chmod 600 $FILE
 }
 
 init_config_files(){
@@ -34,7 +36,32 @@ init_config_files(){
   rm -f ./db-init/01.sql
   cp ./db-init/01.sql.bak ./db-init/01.sql
 
+
+  if grep -Gq "DEFAULT_USER*" "$FILE"
+  then
+    sed -i "s/DEFAULT_USER.*//g" "$FILE"
+    sed -ir '/^\s*$/d' "$FILE"
+    DEFAULTUSER="${USER}"
+  fi
+  echo "DEFAULT_USER=$DEFAULTUSER">>.env
+
   echo "Config files init complete."
+
+
+}
+
+init_nextcloud_folders(){
+  if [ ! -d ${ROOT_DIR}/apps/nextcloud/config ]; then
+    mkdir ${ROOT_DIR}/apps/nextcloud/config
+  fi
+  if [ ! -d ${ROOT_DIR}/apps/nextcloud/themes ]; then
+    mkdir ${ROOT_DIR}/apps/nextcloud/themes
+  fi
+  if [ ! -d ${ROOT_DIR}/apps/nextcloud/data ]; then
+    mkdir ${ROOT_DIR}/apps/nextcloud/data
+  fi
+  sudo chown -R www-data: ${ROOT_DIR}/apps/nextcloud/
+
 }
 
 get_init_pico(){
@@ -55,6 +82,9 @@ get_init_pico(){
 }
 
 setup_secrets(){
+
+  # TODO: Setup gpg keyfiles
+
   echo
   echo "== USER PASSWORD GENERATION =="
   echo "Caution: The following passwords will be automatically copied into the .env file in the directory of this script. Precautions should be taken to not allow undesired access to the file accordingly."
@@ -159,6 +189,14 @@ cleanup(){
   rm ./db-init/01.sql
 }
 
+init_backups(){
+  :
+}
+
+launch_db(){
+  docker-compose down && docker-compose up -d db
+}
+
 launch() {
   echo "Launching! (This step may take a while, please wait...)"
   ./startup.sh
@@ -173,13 +211,15 @@ init_backups(){
 
 import_env
 init_config_files
+init_nextcloud_folders
 get_init_pico
 setup_secrets
 kanboard_db_init
 freshrss_db_init
 setup_docker_networks
 setup_systemd_services
-launch
+launch_db
 waitUntilServiceIsReady dbIsReady "MariaDB"
+launch
 cleanup
 init_backups

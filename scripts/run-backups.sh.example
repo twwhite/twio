@@ -2,6 +2,13 @@
 # Do no change this value, it is auto-populated by the init_backups script.
 ROOT_DIR=ROOTDIRPLACEHOLDER
 
+if ! [[ "$EUID" = 0 ]]
+then
+    echo "Please run script as root."
+    exit 1
+fi
+
+
 # TODO - convert to twio ecosystem
 FILE=${ROOT_DIR}/scripts/.env
 
@@ -21,7 +28,7 @@ cloud_deploy(){
     echo "No variable set for cloud deploy"
   else
     echo "Rclone syncing to remote..."
-    rclone sync ${ROOT_DIR}/backups ${RCLONE_REMOTE_NAME}
+    sudo -u ${DEFAULT_USER} rclone sync ${ROOT_DIR}/backups ${RCLONE_REMOTE_NAME}
     if [[ $?==0 ]]; then echo "Cloud deployment successful"&&echo $(date)": Cloud deployment successful. Destination - ${RCLONE_REMOTE_NAME}" >> ${ROOT_DIR}/scripts/logs/backups.log; fi
   fi
 }
@@ -35,10 +42,27 @@ clear_vars(){
 borg_create(){
   echo
   echo "STAGING ${BACKUP_SERVICE} BACKUP"
+
+
+  # Backup database if var is set
+  if [ -z ${BACKUP_DATABASE+x} ]
+  then
+    :
+  else
+    echo "Backing up ${BACKUP_DATABASE} database."
+    mkdir ${ROOT_DIR}/apps/${BACKUP_SERVICE}/database-backup
+    docker exec -ti db mysqldump -u root -p4458920a5445a0af49c0be4eae0c93b252e77a65 ${BACKUP_DATABASE} > ${ROOT_DIR}/apps/${BACKUP_SERVICE}/database-backup/${BACKUP_SERVICE}.db
+  fi
+
+
   archive_name="${BACKUP_SERVICE}-$(date +'%Y-%m-%d-%H%M')"
   borg_options="--stats --compression zlib"
   echo $(date)": ${BACKUP_SERVICE} - Creating ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name}" >> ${ROOT_DIR}/scripts/logs/backups.log
-  BORG_PASSPHRASE=${BORG_PASS} borg create ${borg_options} ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name} "${BACKUP_DIRECTORIES[*]}"
+
+  # To do: Fix array input
+  sudo -u ${DEFAULT_USER} BORG_PASSPHRASE=${BORG_PASS} borg create ${borg_options} ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}::${archive_name} "${BACKUP_DIRECTORIES[*]}"
+  # sudo chown -R $USER:$USER ${ROOT_DIR}/backups/borg-${BACKUP_SERVICE}
+  rm -rf ${ROOT_DIR}/apps/${BACKUP_SERVICE}/database-backup
   clear_vars
 }
 
@@ -53,9 +77,16 @@ stage_nextcloud(){
   # Enable maintenance mode
   docker exec -ti --user www-data nextcloud php occ maintenance:mode --on
 
-
+  # Specific to nextcloud & borg; need to setup permissions
+  chown -R ${DEFAULT_USER} "${BACKUP_DIRECTORIES[*]}"
 
   borg_create
+
+  # Repair permissions
+  BACKUP_DIRECTORIES=("${ROOT_DIR}/apps/${BACKUP_SERVICE}/")
+  chown -R www-data:root "${BACKUP_DIRECTORIES[*]}"
+
+  clear_vars
 
   # Enable maintenance mode
   docker exec -ti --user www-data nextcloud php occ maintenance:mode --off
@@ -65,6 +96,7 @@ stage_nextcloud(){
 stage_dokuwiki(){
   BACKUP_SERVICE="dokuwiki"
   BACKUP_DIRECTORIES=("${DOKUWIKI_DATA_DIR}")
+  BACKUP_DATABASE="${BACKUP_SERVICE}"
   borg_create
 }
 
@@ -74,6 +106,8 @@ stage_kanboard(){
 }
 
 stage_pico(){
+  echo "Starting pico backup"
+
   BACKUP_SERVICE="pico"
   BACKUP_DIRECTORIES=("${PICO_DATA_DIR}")
   borg_create
@@ -84,7 +118,7 @@ prune_borg(){
   repos=("nextcloud" "pico")
   for repo in "${repos[@]}"
   do
-    BORG_PASSPHRASE=${BORG_PASS} borg prune \
+    sudo -u ${DEFAULT_USER} BORG_PASSPHRASE=${BORG_PASS} borg prune \
      --stats \
      --keep-minutely 5 \
      --keep-daily 7 \
@@ -93,13 +127,13 @@ prune_borg(){
      --keep-yearly -1 \
      ${ROOT_DIR}/backups/borg-$repo
   done
-  allBackupsSize=$(du -hs ${ROOT_DIR}/backups)
+  allBackupsSize=$(sudo -u ${DEFAULT_USER} du -hs ${ROOT_DIR}/backups)
   echo $(date)": Total Backup Size $allBackupsSize" >> ${ROOT_DIR}/scripts/logs/backups.log
 }
 
 echo $(date)": === TWIO BACKUP SCRIPT STARTED ===" >> ${ROOT_DIR}/scripts/logs/backups.log
 stage_nextcloud
-# stage_pico
-# prune_borg
-# cloud_deploy
+stage_pico
+prune_borg
+cloud_deploy
 echo $(date)": === TWIO BACKUP SCRIPT COMPLETE ===" >> ${ROOT_DIR}/scripts/logs/backups.log
