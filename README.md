@@ -51,15 +51,8 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 <!-- ROADMAP -->
 ## Roadmap
-- Filesystem staging
-- App staging
-- App running
-- App stopping
-- Backups & remote deployment
-- Logging
- 
-- [x] Filesystem staging
-- [x] App staging
+- [ ] Filesystem staging
+- [ ] App staging
 - [ ] App start / stop functionality
 - [ ] Backup & remote deployment
 - [ ] Recovery
