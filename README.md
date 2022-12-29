@@ -23,7 +23,7 @@ Twio relies on a few 3rd-party applications for proper operation. Install the fo
 
 ### Installation
 
-1. Clone the repo and run the script:
+1. Clone the repo and change into the repo directory:
    ```sh
    git clone https://github.com/twwhite/twio.git
    cd twio
