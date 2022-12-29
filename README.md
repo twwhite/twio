@@ -23,7 +23,7 @@ Twio relies on a few 3rd-party applications for proper operation. Install the fo
 
 ### Installation
 
-1. Clone the repo and run the script:
+1. Clone the repo and change into the repo directory:
    ```sh
    git clone https://github.com/twwhite/twio.git
    cd twio
@@ -51,15 +51,8 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 <!-- ROADMAP -->
 ## Roadmap
-- Filesystem staging
-- App staging
-- App running
-- App stopping
-- Backups & remote deployment
-- Logging
- 
-- [x] Filesystem staging
-- [x] App staging
+- [ ] Filesystem staging
+- [ ] App staging
 - [ ] App start / stop functionality
 - [ ] Backup & remote deployment
 - [ ] Recovery
